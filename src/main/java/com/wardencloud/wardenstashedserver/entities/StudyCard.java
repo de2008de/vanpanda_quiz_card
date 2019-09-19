@@ -18,7 +18,7 @@ public class StudyCard implements Card {
 
     @OrderBy("id asc")
     @OneToMany
-    private Set<ConceptCard> conceptCard;
+    private Set<ConceptCard> conceptCards;
 
     public int getId() {
         return id;
@@ -52,11 +52,11 @@ public class StudyCard implements Card {
         this.school = school;
     }
 
-    public Set<ConceptCard> getConceptCard() {
-        return conceptCard;
+    public Set<ConceptCard> getConceptCards() {
+        return conceptCards;
     }
 
-    public void setConceptCard(Set<ConceptCard> conceptCard) {
-        this.conceptCard = conceptCard;
+    public void setConceptCards(Set<ConceptCard> conceptCards) {
+        this.conceptCards = conceptCards;
     }
 }
