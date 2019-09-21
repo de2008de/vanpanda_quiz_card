@@ -12,8 +12,8 @@ public class ConceptCard implements Card{
 
     private String title;
 
-    @OneToMany(cascade = {CascadeType.ALL})
-    private Set<KeyPoint> keyPoints;
+    @Column(columnDefinition = "TEXT")
+    private String content;
 
     public int getId() {
         return id;
@@ -31,11 +31,11 @@ public class ConceptCard implements Card{
         this.title = title;
     }
 
-    public Set<KeyPoint> getKeyPoints() {
-        return keyPoints;
+    public String getContent() {
+        return content;
     }
 
-    public void setKeyPoints(Set<KeyPoint> keyPoints) {
-        this.keyPoints = keyPoints;
+    public void setContent(String content) {
+        this.content = content;
     }
 }
