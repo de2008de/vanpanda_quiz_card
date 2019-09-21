@@ -17,7 +17,7 @@ public class StudyCard implements Card {
     private String school;
 
     @OrderBy("id asc")
-    @OneToMany
+    @OneToMany(cascade = {CascadeType.ALL})
     private Set<ConceptCard> conceptCards;
 
     public int getId() {

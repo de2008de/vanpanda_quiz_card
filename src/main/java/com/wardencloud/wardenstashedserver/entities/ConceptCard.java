@@ -12,7 +12,7 @@ public class ConceptCard implements Card{
 
     private String title;
 
-    @OneToMany
+    @OneToMany(cascade = {CascadeType.ALL})
     private Set<KeyPoint> keyPoints;
 
     public int getId() {
