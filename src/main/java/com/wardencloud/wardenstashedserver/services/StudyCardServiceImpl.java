@@ -1,7 +1,6 @@
 package com.wardencloud.wardenstashedserver.services;
 
 import com.wardencloud.wardenstashedserver.entities.ConceptCard;
-import com.wardencloud.wardenstashedserver.entities.KeyPoint;
 import com.wardencloud.wardenstashedserver.entities.StudyCard;
 import com.wardencloud.wardenstashedserver.repository.StudyCardPagedJpaRepository;
 import com.wardencloud.wardenstashedserver.repository.StudyCardRepository;
@@ -61,21 +60,7 @@ public class StudyCardServiceImpl implements StudyCardService {
     public ConceptCard convertMapToConceptCard(Map<Object, Object> map) {
         ConceptCard conceptCard = new ConceptCard();
         conceptCard.setTitle((String) map.get("title"));
-        List<Object> keyPointList = (List<Object>) map.get("keyPoints");
-        Iterator<Object> iterator =  keyPointList.listIterator();
-        Set<KeyPoint> keyPointSet = new HashSet<>();
-        while(iterator.hasNext()) {
-            Map<Object, Object> keyPointMap = (Map<Object, Object>) iterator.next();
-            KeyPoint keyPoint = convertMapToKeyPoint(keyPointMap);
-            keyPointSet.add(keyPoint);
-        }
-        conceptCard.setKeyPoints(keyPointSet);
+        conceptCard.setContent((String) map.get("content"));
         return conceptCard;
-    }
-
-    public KeyPoint convertMapToKeyPoint(Map<Object, Object> map) {
-        KeyPoint keyPoint = new KeyPoint();
-        keyPoint.setContent((String) map.get("content"));
-        return keyPoint;
     }
 }

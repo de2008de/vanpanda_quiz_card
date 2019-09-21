@@ -1,7 +1,6 @@
 package com.wardencloud.wardenstashedserver.services;
 
 import com.wardencloud.wardenstashedserver.entities.ConceptCard;
-import com.wardencloud.wardenstashedserver.entities.KeyPoint;
 import com.wardencloud.wardenstashedserver.entities.StudyCard;
 import org.springframework.data.domain.Page;
 
@@ -19,5 +18,4 @@ public interface StudyCardService {
     );
     Set<ConceptCard> convertListToConceptCardSet(List<Object> list);
     ConceptCard convertMapToConceptCard(Map<Object, Object> map);
-    KeyPoint convertMapToKeyPoint(Map<Object, Object> map);
 }

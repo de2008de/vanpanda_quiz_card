@@ -39,9 +39,7 @@ public class CardController {
         String subtitle = (String) payload.get("subtitle");
         String school = (String) payload.get("school");
         List<Object> conceptCardList = new ArrayList<>((List<ConceptCard>) payload.get("conceptCards"));
-
         Set<ConceptCard> conceptCardSet = studyCardService.convertListToConceptCardSet(conceptCardList);
-
         int studyCardId = studyCardService.addStudyCard(
                 title,
                 subtitle,
