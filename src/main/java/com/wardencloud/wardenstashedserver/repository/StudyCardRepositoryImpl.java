@@ -33,4 +33,8 @@ public class StudyCardRepositoryImpl implements StudyCardRepository {
         entityManager.refresh(studyCard);
         return studyCard.getId();
     }
+
+    public StudyCard getStudyCardById(int id) {
+        return entityManager.find(StudyCard.class, id);
+    }
 }

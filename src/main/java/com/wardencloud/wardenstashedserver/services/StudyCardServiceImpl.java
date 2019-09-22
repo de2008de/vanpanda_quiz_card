@@ -63,4 +63,8 @@ public class StudyCardServiceImpl implements StudyCardService {
         conceptCard.setContent((String) map.get("content"));
         return conceptCard;
     }
+
+    public StudyCard getStudyCardById(int id) {
+        return studyCardRepository.getStudyCardById(id);
+    }
 }

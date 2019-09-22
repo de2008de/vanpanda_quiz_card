@@ -1,6 +1,7 @@
 package com.wardencloud.wardenstashedserver.repository;
 
 import com.wardencloud.wardenstashedserver.entities.ConceptCard;
+import com.wardencloud.wardenstashedserver.entities.StudyCard;
 
 import java.util.Set;
 
@@ -11,4 +12,5 @@ public interface StudyCardRepository {
             String school,
             Set<ConceptCard> conceptCards
     );
+    StudyCard getStudyCardById(int id);
 }
