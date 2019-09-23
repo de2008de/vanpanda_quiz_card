@@ -50,4 +50,12 @@ public class CardController {
         jsonObject.put("id", studyCardId);
         return ResponseEntity.ok().body(jsonObject);
     }
+
+    @GetMapping(value = "/studycard/{id}")
+    public ResponseEntity getStudyCardById(@PathVariable int id) {
+        JSONObject jsonObject = new JSONObject();
+        StudyCard studyCard = studyCardService.getStudyCardById(id);
+        jsonObject.put("data", studyCard);
+        return ResponseEntity.ok().body(jsonObject);
+    }
 }
