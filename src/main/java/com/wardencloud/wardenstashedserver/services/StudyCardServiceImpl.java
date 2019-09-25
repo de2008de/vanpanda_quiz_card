@@ -2,8 +2,8 @@ package com.wardencloud.wardenstashedserver.services;
 
 import com.wardencloud.wardenstashedserver.entities.ConceptCard;
 import com.wardencloud.wardenstashedserver.entities.StudyCard;
-import com.wardencloud.wardenstashedserver.repository.StudyCardPagedJpaRepository;
-import com.wardencloud.wardenstashedserver.repository.StudyCardRepository;
+import com.wardencloud.wardenstashedserver.repositories.StudyCardPagedJpaRepository;
+import com.wardencloud.wardenstashedserver.repositories.StudyCardRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
