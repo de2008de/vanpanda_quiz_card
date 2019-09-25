@@ -1,4 +1,4 @@
-package com.wardencloud.wardenstashedserver.repository;
+package com.wardencloud.wardenstashedserver.repositories;
 
 import com.wardencloud.wardenstashedserver.entities.StudyCard;
 import org.springframework.data.repository.PagingAndSortingRepository;
