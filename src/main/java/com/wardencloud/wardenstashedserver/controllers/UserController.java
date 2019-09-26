@@ -1,6 +1,8 @@
 package com.wardencloud.wardenstashedserver.controllers;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.wardencloud.wardenstashedserver.entities.User;
 import com.wardencloud.wardenstashedserver.jwt.annotations.PassToken;
 import com.wardencloud.wardenstashedserver.services.TokenService;
@@ -68,10 +70,6 @@ public class UserController {
         }
     }
 
-    /**
-     * response body format:
-     *  "fieldName": "error message"
-     */
     @PostMapping(value = "/signup")
     @PassToken
     public ResponseEntity signUp(@RequestBody Map<String, String> payload) {
@@ -111,5 +109,17 @@ public class UserController {
             jsonObject.put(USER_ID_KEY, userId);
             return ResponseEntity.ok().body(jsonObject);
         }
+    }
+
+    @GetMapping(value = "/profile")
+    public ResponseEntity getUserProfile(@RequestHeader("token") String token) {
+        JSONObject data = new JSONObject();
+        JSONObject jsonObject = new JSONObject();
+        int userId = tokenService.getUserIdFromToken(token);
+        User user = userService.findUserById(userId);
+        data.put("username", user.getUsername());
+        data.put("email", user.getEmail());
+        jsonObject.put("data", data);
+        return ResponseEntity.ok().body(jsonObject);
     }
 }
