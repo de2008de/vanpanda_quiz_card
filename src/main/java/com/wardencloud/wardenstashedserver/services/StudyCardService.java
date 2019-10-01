@@ -19,4 +19,5 @@ public interface StudyCardService {
     Set<ConceptCard> convertListToConceptCardSet(List<Object> list);
     ConceptCard convertMapToConceptCard(Map<Object, Object> map);
     StudyCard getStudyCardById(int id);
+    List<ConceptCard> getConceptCardsByIds(List<Integer> ids);
 }

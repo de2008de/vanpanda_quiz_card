@@ -67,4 +67,8 @@ public class StudyCardServiceImpl implements StudyCardService {
     public StudyCard getStudyCardById(int id) {
         return studyCardRepository.getStudyCardById(id);
     }
+
+    public List<ConceptCard> getConceptCardsByIds(List<Integer> ids) {
+        return studyCardRepository.getConceptCardsByIds(ids);
+    }
 }
