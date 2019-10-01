@@ -3,6 +3,7 @@ package com.wardencloud.wardenstashedserver.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
+import java.util.Set;
 
 @Entity
 @Table(name = "Users")
@@ -10,12 +11,19 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+
     @Column(name = "username", unique = true, nullable = false, length = 100)
     private String username;
+
     @Column(name = "email", unique = true, nullable = false, length = 100)
     private String email;
+
     @JsonIgnore
     private String password;
+
+    @OrderBy("id desc")
+    @OneToMany(cascade = {CascadeType.ALL})
+    private Set<Bookmark> bookmarks;
 
     public int getId() {
         return id;
@@ -47,5 +55,23 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public Set<Bookmark> getBookmarks() {
+        return bookmarks;
+    }
+
+    public void setBookmarks(Set<Bookmark> bookmarks) {
+        this.bookmarks = bookmarks;
+    }
+
+    public void addBookmark(Bookmark bookmark) {
+        this.bookmarks.add(bookmark);
+    }
+
+    public void deleteBookmarkByConceptCardId(int conceptCardId) {
+        Bookmark bookmark = new Bookmark();
+        bookmark.setConceptCardId(conceptCardId);
+        this.bookmarks.remove(bookmark);
     }
 }
