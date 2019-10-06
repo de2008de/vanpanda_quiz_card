@@ -106,6 +106,9 @@ public class UserController {
             jsonObject.put(ERROR_MESSAGES_KEY, errorMessages);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(jsonObject);
         } else {
+            User user = userService.findUserById(userId);
+            String token = tokenService.getToken(user);
+            jsonObject.put(TOKEN_KEY, token);
             jsonObject.put(USER_ID_KEY, userId);
             return ResponseEntity.ok().body(jsonObject);
         }
