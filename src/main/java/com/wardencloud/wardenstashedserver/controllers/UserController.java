@@ -1,8 +1,6 @@
 package com.wardencloud.wardenstashedserver.controllers;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.wardencloud.wardenstashedserver.entities.User;
 import com.wardencloud.wardenstashedserver.jwt.annotations.PassToken;
 import com.wardencloud.wardenstashedserver.services.TokenService;
@@ -122,6 +120,7 @@ public class UserController {
         User user = userService.findUserById(userId);
         data.put("username", user.getUsername());
         data.put("email", user.getEmail());
+        data.put("credit", user.getCredit());
         jsonObject.put("data", data);
         return ResponseEntity.ok().body(jsonObject);
     }
