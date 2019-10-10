@@ -42,7 +42,7 @@ public class PaymentController {
         User user = userService.findUserById(userId);
         data.put("credit", result.get("credit"));
         data.put("company", "Vanpanda");
-        data.put("amount", payment.getAmount());
+        data.put("amount", result.get("amount"));
         data.put("username", user.getUsername());
         data.put("invoiceId", result.get("paymentId"));
         jsonObject.put("data", data);

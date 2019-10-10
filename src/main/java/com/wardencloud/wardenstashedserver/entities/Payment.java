@@ -13,6 +13,7 @@ public class Payment {
     private String token;
     private BigDecimal amount;
     private String description;
+    private String stripeChargeId;
 
     public int getId() {
         return id;
@@ -52,5 +53,13 @@ public class Payment {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getStripeChargeId() {
+        return stripeChargeId;
+    }
+
+    public void setStripeChargeId(String stripeChargeId) {
+        this.stripeChargeId = stripeChargeId;
     }
 }

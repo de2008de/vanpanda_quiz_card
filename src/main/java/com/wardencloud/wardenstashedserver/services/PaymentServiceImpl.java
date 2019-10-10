@@ -42,26 +42,29 @@ public class PaymentServiceImpl implements PaymentService {
         payment.setUserId(userId);
         Stripe.apiKey = stripeSecret;
         int amount = (int) Math.ceil(payment.getAmount().doubleValue() * dollarCentRatio);
-        int credit = (int) payment.getAmount().doubleValue() * dollarCreditRatio;
         String stripeToken = payment.getToken();
         Map<String, Object> params = new HashMap<>();
-        String description = "Add credit, dollar of " + amount + " cents, " + "credit of " + credit + ", "
-                + "for user id " + userId;
-        payment.setDescription(description);
         params.put("amount", amount);
         params.put("currency", "cad");
-        params.put("description", description);
         params.put("source", stripeToken);
         params.put("statement_descriptor", "Vanpanda credit charge");
         try {
             // If no exception is thrown and Charge object is created,
             // the payment is success
             Charge charge = Charge.create(params);
+            // TODO: We need a credit entity because when we have discount, dollar
+            // amount does not always represent the amount of credit
+            int credit = (int) (charge.getAmount() / dollarCentRatio * dollarCreditRatio);
+            String description = "Add credit, dollar of $" + charge.getAmount() / dollarCentRatio + " CAD, " + "for "
+                    + credit + " credit, " + "for user id " + userId;
+            payment.setDescription(description);
+            payment.setStripeChargeId(charge.getId());
             Payment addedPayment = paymentRepository.addPayment(payment);
-            User user = userService.addCreditForUserById(userId, credit);
+            userService.addCreditForUserById(userId, credit);
             result.put("status", 0);
-            result.put("credit", user.getCredit());
+            result.put("credit", credit);
             result.put("paymentId", addedPayment.getId());
+            result.put("amount", charge.getAmount() / dollarCentRatio);
             return result;
         } catch (StripeException e) {
             result.put("status", -1);
