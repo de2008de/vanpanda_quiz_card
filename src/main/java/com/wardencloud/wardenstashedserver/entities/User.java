@@ -3,6 +3,7 @@ package com.wardencloud.wardenstashedserver.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.util.Set;
 
 @Entity
@@ -24,6 +25,9 @@ public class User {
     @OrderBy("id desc")
     @OneToMany(cascade = {CascadeType.ALL})
     private Set<Bookmark> bookmarks;
+
+    @Column(name = "credit", columnDefinition = "integer default 0")
+    private int credit;
 
     public int getId() {
         return id;
@@ -73,5 +77,17 @@ public class User {
         Bookmark bookmark = new Bookmark();
         bookmark.setConceptCardId(conceptCardId);
         this.bookmarks.remove(bookmark);
+    }
+
+    public int getCredit() {
+        return credit;
+    }
+
+    public void setCredit(int credit) {
+        this.credit = credit;
+    }
+
+    public void addCredit(int credit) {
+        this.credit += credit;
     }
 }

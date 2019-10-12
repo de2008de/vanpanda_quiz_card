@@ -7,4 +7,5 @@ public interface UserRepository {
     User findByUsername(String username);
     User findByUserEmail(String email);
     User addUser(String username, String email, String password);
+    User addCreditForUserById(int id, int credit);
 }
