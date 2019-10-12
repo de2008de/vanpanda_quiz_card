@@ -5,6 +5,8 @@ import com.wardencloud.wardenstashedserver.entities.ConceptCard;
 import com.wardencloud.wardenstashedserver.entities.StudyCard;
 import com.wardencloud.wardenstashedserver.helpers.ConvertHelper;
 import com.wardencloud.wardenstashedserver.services.StudyCardService;
+import com.wardencloud.wardenstashedserver.services.TokenService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
@@ -24,6 +26,9 @@ public class CardController {
     @Qualifier("StudyCardServiceImpl")
     private StudyCardService studyCardService;
 
+    @Autowired
+    private TokenService tokenService;
+
     @GetMapping(value = "/studycard")
     public ResponseEntity<Object> getAllStudyCards(Pageable pageable) {
         int pageNumber = pageable.getPageNumber();
@@ -35,18 +40,21 @@ public class CardController {
     }
 
     @PostMapping(value = "/studycard")
-    public ResponseEntity<Object> addStudyCard(@RequestBody JSONObject payload) {
+    public ResponseEntity<Object> addStudyCard(@RequestHeader("token") String token, @RequestBody JSONObject payload) {
         String title = (String) payload.get("title");
         String subtitle = (String) payload.get("subtitle");
         String school = (String) payload.get("school");
         List<?> uncastedConceptCardList = (List<?>) payload.get("conceptCards");
         List<Map<Object, Object>> conceptCardMapList = ConvertHelper.castList(Map.class, uncastedConceptCardList);
         Set<ConceptCard> conceptCardSet = studyCardService.convertListToConceptCardSet(conceptCardMapList);
+        // TODO: Should we validate userId or should we assume it is correct?
+        int userId = tokenService.getUserIdFromToken(token);
         int studyCardId = studyCardService.addStudyCard(
                 title,
                 subtitle,
                 school,
-                conceptCardSet
+                conceptCardSet,
+                userId
         );
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("id", studyCardId);

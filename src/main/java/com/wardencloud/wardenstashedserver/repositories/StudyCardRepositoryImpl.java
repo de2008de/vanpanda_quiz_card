@@ -2,6 +2,8 @@ package com.wardencloud.wardenstashedserver.repositories;
 
 import com.wardencloud.wardenstashedserver.entities.ConceptCard;
 import com.wardencloud.wardenstashedserver.entities.StudyCard;
+import com.wardencloud.wardenstashedserver.entities.User;
+
 import org.hibernate.MultiIdentifierLoadAccess;
 import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -24,13 +26,15 @@ public class StudyCardRepositoryImpl implements StudyCardRepository {
             String title,
             String subtitle,
             String school,
-            Set<ConceptCard> conceptCards
+            Set<ConceptCard> conceptCards,
+            User user
     ) {
         StudyCard studyCard = new StudyCard();
         studyCard.setTitle(title);
         studyCard.setSubtitle(subtitle);
         studyCard.setSchool(school);
         studyCard.setConceptCards(conceptCards);
+        studyCard.setUser(user);
         entityManager.persist(studyCard);
         entityManager.flush();
         entityManager.refresh(studyCard);
