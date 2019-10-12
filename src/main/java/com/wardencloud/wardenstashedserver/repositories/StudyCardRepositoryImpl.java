@@ -44,7 +44,7 @@ public class StudyCardRepositoryImpl implements StudyCardRepository {
     public List<ConceptCard> getConceptCardsByIds(List<Integer> ids) {
         // Use batch processing to improve performance
         Session session = entityManager.unwrap(Session.class);
-        MultiIdentifierLoadAccess multiIdentifierLoadAccess = session.byMultipleIds(ConceptCard.class);
+        MultiIdentifierLoadAccess<ConceptCard> multiIdentifierLoadAccess = session.byMultipleIds(ConceptCard.class);
         List<ConceptCard> conceptCards = multiIdentifierLoadAccess.multiLoad(ids);
         return conceptCards;
     }

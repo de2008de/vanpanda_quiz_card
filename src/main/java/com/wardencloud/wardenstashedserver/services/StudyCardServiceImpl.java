@@ -47,11 +47,11 @@ public class StudyCardServiceImpl implements StudyCardService {
         return studyCardId;
     }
 
-    public Set<ConceptCard> convertListToConceptCardSet(List<Object> list) {
-        Iterator<Object> iterator = list.listIterator();
+    public Set<ConceptCard> convertListToConceptCardSet(List<Map<Object, Object>> list) {
+        Iterator<Map<Object, Object>> iterator = list.listIterator();
         Set<ConceptCard> conceptCardSet = new HashSet<>();
         while(iterator.hasNext()) {
-            ConceptCard conceptCard = convertMapToConceptCard((Map<Object, Object>) iterator.next());
+            ConceptCard conceptCard = convertMapToConceptCard(iterator.next());
             conceptCardSet.add(conceptCard);
         }
         return conceptCardSet;

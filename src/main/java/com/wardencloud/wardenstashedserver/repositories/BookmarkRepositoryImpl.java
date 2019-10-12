@@ -2,6 +2,7 @@ package com.wardencloud.wardenstashedserver.repositories;
 
 import com.wardencloud.wardenstashedserver.entities.Bookmark;
 import com.wardencloud.wardenstashedserver.entities.User;
+import com.wardencloud.wardenstashedserver.helpers.ConvertHelper;
 import com.wardencloud.wardenstashedserver.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
+
 import java.util.List;
 
 @Repository
@@ -24,10 +26,14 @@ public class BookmarkRepositoryImpl implements BookmarkRepository {
 
     public List<Bookmark> getBookmarkByUserId(int id) {
         try {
-            List<Bookmark> bookmarks = entityManager.createNativeQuery("SELECT * FROM Bookmarks b JOIN USERS_BOOKMARKS ub ON ub.bookmarks_id = b.id JOIN USERS u ON u.id = ub.user_id WHERE u.id = :id", Bookmark.class)
+            List<?> uncastedBookmarkList = entityManager.createNativeQuery("SELECT * FROM Bookmarks b JOIN USERS_BOOKMARKS ub ON ub.bookmarks_id = b.id JOIN USERS u ON u.id = ub.user_id WHERE u.id = :id", Bookmark.class)
                     .setParameter("id", id)
                     .getResultList();
-            return bookmarks;
+            List<Bookmark> castedBookmarkList = ConvertHelper.castList(
+                Bookmark.class, 
+                uncastedBookmarkList
+            );
+            return castedBookmarkList;
         } catch (RuntimeException e) {
             return null;
         }

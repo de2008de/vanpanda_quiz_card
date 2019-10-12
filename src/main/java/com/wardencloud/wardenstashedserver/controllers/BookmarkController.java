@@ -31,7 +31,7 @@ public class BookmarkController {
     StudyCardService studyCardService;
 
     @GetMapping
-    public ResponseEntity getBookmarkByUserId(@RequestHeader("token") String token) {
+    public ResponseEntity<Object> getBookmarkByUserId(@RequestHeader("token") String token) {
         JSONObject bookmarkObjects = new JSONObject();
         JSONObject data = new JSONObject();
         int userId = tokenService.getUserIdFromToken(token);
@@ -42,7 +42,7 @@ public class BookmarkController {
     }
 
     @GetMapping(value = "/bookmarked_concept_cards")
-    public ResponseEntity getBookmarkedConceptCardsByUserId(@RequestHeader("token") String token) {
+    public ResponseEntity<Object> getBookmarkedConceptCardsByUserId(@RequestHeader("token") String token) {
         JSONObject data = new JSONObject();
         int userId = tokenService.getUserIdFromToken(token);
         List<Bookmark> bookmarks = bookmarkService.getBookmarkByUserId(userId);
@@ -56,7 +56,7 @@ public class BookmarkController {
     }
 
     @PostMapping
-    public ResponseEntity addBookmarkByUserId(@RequestHeader("token") String token, @RequestBody Map<String, String> payload) {
+    public ResponseEntity<Object> addBookmarkByUserId(@RequestHeader("token") String token, @RequestBody Map<String, String> payload) {
         JSONObject bookmarkObject = new JSONObject();
         JSONObject data = new JSONObject();
         int userId = tokenService.getUserIdFromToken(token);
@@ -68,7 +68,7 @@ public class BookmarkController {
     }
 
     @DeleteMapping
-    public ResponseEntity deleteBookmarkByConceptCardId(@RequestHeader("token") String token, @RequestBody Map<String, String> payload) {
+    public ResponseEntity<Object> deleteBookmarkByConceptCardId(@RequestHeader("token") String token, @RequestBody Map<String, String> payload) {
         JSONObject bookmarkObject = new JSONObject();
         JSONObject data = new JSONObject();
         int userId = tokenService.getUserIdFromToken(token);

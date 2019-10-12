@@ -3,6 +3,7 @@ package com.wardencloud.wardenstashedserver.controllers;
 import com.alibaba.fastjson.JSONObject;
 import com.wardencloud.wardenstashedserver.entities.ConceptCard;
 import com.wardencloud.wardenstashedserver.entities.StudyCard;
+import com.wardencloud.wardenstashedserver.helpers.ConvertHelper;
 import com.wardencloud.wardenstashedserver.services.StudyCardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -11,8 +12,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @CrossOrigin
@@ -24,7 +25,7 @@ public class CardController {
     private StudyCardService studyCardService;
 
     @GetMapping(value = "/studycard")
-    public ResponseEntity getAllStudyCards(Pageable pageable) {
+    public ResponseEntity<Object> getAllStudyCards(Pageable pageable) {
         int pageNumber = pageable.getPageNumber();
         Page<StudyCard> page = studyCardService.findAllStudyCards(pageNumber);
         List<StudyCard> studyCards = page.getContent();
@@ -34,12 +35,13 @@ public class CardController {
     }
 
     @PostMapping(value = "/studycard")
-    public ResponseEntity addStudyCard(@RequestBody JSONObject payload) {
+    public ResponseEntity<Object> addStudyCard(@RequestBody JSONObject payload) {
         String title = (String) payload.get("title");
         String subtitle = (String) payload.get("subtitle");
         String school = (String) payload.get("school");
-        List<Object> conceptCardList = new ArrayList<>((List<ConceptCard>) payload.get("conceptCards"));
-        Set<ConceptCard> conceptCardSet = studyCardService.convertListToConceptCardSet(conceptCardList);
+        List<?> uncastedConceptCardList = (List<?>) payload.get("conceptCards");
+        List<Map<Object, Object>> conceptCardMapList = ConvertHelper.castList(Map.class, uncastedConceptCardList);
+        Set<ConceptCard> conceptCardSet = studyCardService.convertListToConceptCardSet(conceptCardMapList);
         int studyCardId = studyCardService.addStudyCard(
                 title,
                 subtitle,
@@ -52,7 +54,7 @@ public class CardController {
     }
 
     @GetMapping(value = "/studycard/{id}")
-    public ResponseEntity getStudyCardById(@PathVariable int id) {
+    public ResponseEntity<Object> getStudyCardById(@PathVariable int id) {
         JSONObject jsonObject = new JSONObject();
         StudyCard studyCard = studyCardService.getStudyCardById(id);
         jsonObject.put("data", studyCard);
