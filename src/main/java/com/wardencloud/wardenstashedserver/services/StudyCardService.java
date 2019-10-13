@@ -14,9 +14,10 @@ public interface StudyCardService {
             String title,
             String subtitle,
             String school,
-            Set<ConceptCard> conceptCards
+            Set<ConceptCard> conceptCards,
+            int userId
     );
-    Set<ConceptCard> convertListToConceptCardSet(List<Object> list);
+    Set<ConceptCard> convertListToConceptCardSet(List<Map<Object, Object>> list);
     ConceptCard convertMapToConceptCard(Map<Object, Object> map);
     StudyCard getStudyCardById(int id);
     List<ConceptCard> getConceptCardsByIds(List<Integer> ids);

@@ -1,6 +1,9 @@
 package com.wardencloud.wardenstashedserver.entities;
 
 import javax.persistence.*;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.Set;
 
 @Entity
@@ -19,6 +22,15 @@ public class StudyCard implements Card {
     @OrderBy("id asc")
     @OneToMany(cascade = {CascadeType.ALL})
     private Set<ConceptCard> conceptCards;
+
+    @JsonIgnore
+    @ManyToOne
+    private User user;
+
+    @Transient
+    private int userId;
+    @Transient
+    private String username;
 
     public int getId() {
         return id;
@@ -58,5 +70,31 @@ public class StudyCard implements Card {
 
     public void setConceptCards(Set<ConceptCard> conceptCards) {
         this.conceptCards = conceptCards;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.setUserId(user.getId());
+        this.setUsername(user.getUsername());
+        this.user = user;
+    }
+
+    public int getUserId() {
+        return this.user.getId();
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
+
+    public String getUsername() {
+        return this.user.getUsername();
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 }

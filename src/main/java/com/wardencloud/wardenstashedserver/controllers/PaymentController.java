@@ -30,7 +30,7 @@ public class PaymentController {
     private UserService userService;
 
     @PostMapping
-    public ResponseEntity processPayment(@RequestHeader("token") String token, @RequestBody Payment payment) {
+    public ResponseEntity<Object> processPayment(@RequestHeader("token") String token, @RequestBody Payment payment) {
         JSONObject jsonObject = new JSONObject();
         JSONObject data = new JSONObject();
         int userId = tokenService.getUserIdFromToken(token);

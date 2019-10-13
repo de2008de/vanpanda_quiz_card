@@ -34,7 +34,7 @@ public class UserController {
 
     @PostMapping(value = "/login")
     @PassToken
-    public ResponseEntity login(@RequestBody Map<String, String> payload) {
+    public ResponseEntity<Object> login(@RequestBody Map<String, String> payload) {
         String email = payload.get("email");
         String password = payload.get("password");
         JSONObject jsonObject = new JSONObject();
@@ -70,7 +70,7 @@ public class UserController {
 
     @PostMapping(value = "/signup")
     @PassToken
-    public ResponseEntity signUp(@RequestBody Map<String, String> payload) {
+    public ResponseEntity<Object> signUp(@RequestBody Map<String, String> payload) {
         Map<String, String> errorMessages = new HashMap<>();
         JSONObject jsonObject = new JSONObject();
 
@@ -113,7 +113,7 @@ public class UserController {
     }
 
     @GetMapping(value = "/profile")
-    public ResponseEntity getUserProfile(@RequestHeader("token") String token) {
+    public ResponseEntity<Object> getUserProfile(@RequestHeader("token") String token) {
         JSONObject data = new JSONObject();
         JSONObject jsonObject = new JSONObject();
         int userId = tokenService.getUserIdFromToken(token);

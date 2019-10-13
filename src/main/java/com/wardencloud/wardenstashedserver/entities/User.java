@@ -3,7 +3,6 @@ package com.wardencloud.wardenstashedserver.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
-import java.math.BigDecimal;
 import java.util.Set;
 
 @Entity
