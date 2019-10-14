@@ -45,7 +45,12 @@ public class CardController {
         String subtitle = (String) payload.get("subtitle");
         String school = (String) payload.get("school");
         List<?> uncastedConceptCardList = (List<?>) payload.get("conceptCards");
-        List<Map<Object, Object>> conceptCardMapList = ConvertHelper.castList(Map.class, uncastedConceptCardList);
+        
+        // Safe checked type conversion
+        // We want to safely convert type for each single map entity
+        List<Map<?, ?>> castedConceptCardList = ConvertHelper.castList(Map.class, uncastedConceptCardList);
+        List<Map<Object, Object>> conceptCardMapList = ConvertHelper.castListOfMap(Object.class, Object.class, castedConceptCardList);
+
         Set<ConceptCard> conceptCardSet = studyCardService.convertListToConceptCardSet(conceptCardMapList);
         // TODO: Should we validate userId or should we assume it is correct?
         int userId = tokenService.getUserIdFromToken(token);
