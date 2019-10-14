@@ -2,6 +2,7 @@ package com.wardencloud.wardenstashedserver.services;
 
 import com.wardencloud.wardenstashedserver.entities.ConceptCard;
 import com.wardencloud.wardenstashedserver.entities.StudyCard;
+import com.wardencloud.wardenstashedserver.entities.User;
 import com.wardencloud.wardenstashedserver.repositories.StudyCardPagedJpaRepository;
 import com.wardencloud.wardenstashedserver.repositories.StudyCardRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,9 @@ public class StudyCardServiceImpl implements StudyCardService {
     @Qualifier("StudyCardRepositoryImpl")
     private StudyCardRepository studyCardRepository;
 
+    @Autowired
+    private UserService userService;
+
     private int pageSize = 10;
     private Sort sortRule = Sort.by(Sort.Order.desc("id"));
 
@@ -36,22 +40,28 @@ public class StudyCardServiceImpl implements StudyCardService {
             String title,
             String subtitle,
             String school,
-            Set<ConceptCard> conceptCards
+            Set<ConceptCard> conceptCards,
+            int userId
     ) {
+        User user = userService.findUserById(userId);
+        if (user == null) {
+            return -1;
+        }
         int studyCardId = studyCardRepository.addStudyCard(
                 title,
                 subtitle,
                 school,
-                conceptCards
+                conceptCards,
+                user
         );
         return studyCardId;
     }
 
-    public Set<ConceptCard> convertListToConceptCardSet(List<Object> list) {
-        Iterator<Object> iterator = list.listIterator();
+    public Set<ConceptCard> convertListToConceptCardSet(List<Map<Object, Object>> list) {
+        Iterator<Map<Object, Object>> iterator = list.listIterator();
         Set<ConceptCard> conceptCardSet = new HashSet<>();
         while(iterator.hasNext()) {
-            ConceptCard conceptCard = convertMapToConceptCard((Map<Object, Object>) iterator.next());
+            ConceptCard conceptCard = convertMapToConceptCard(iterator.next());
             conceptCardSet.add(conceptCard);
         }
         return conceptCardSet;

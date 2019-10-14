@@ -18,10 +18,12 @@ public class UserRepositoryImpl implements UserRepository {
 
     private final String ADD_USER_ERROR_MESSAGE = "Something went wrong when adding new user";
 
+    @Override
     public User findById(int id) {
         return entityManager.find(User.class, id);
     }
 
+    @Override
     public User findByUsername(String username) {
         try {
             return entityManager.createQuery("SELECT u FROM User u WHERE u.username = :username", User.class)
@@ -31,6 +33,7 @@ public class UserRepositoryImpl implements UserRepository {
         }
     }
 
+    @Override
     public User findByUserEmail(String email) {
         try {
             return entityManager.createQuery("SELECT u FROM User u WHERE u.email = :email", User.class)
@@ -40,6 +43,7 @@ public class UserRepositoryImpl implements UserRepository {
         }
     }
 
+    @Override
     public User addUser(String username, String email, String password) {
         try {
             int numUpdated = entityManager.createNativeQuery("INSERT INTO Users (username, email, password) VALUES (:username, :email, :password)", User.class)
@@ -58,5 +62,15 @@ public class UserRepositoryImpl implements UserRepository {
         } catch (RuntimeException e) {
             return null;
         }
+    }
+
+    @Override
+    public User addCreditForUserById(int id, int credit) {
+        User user = findById(id);
+        entityManager.persist(user);
+        user.addCredit(credit);
+        entityManager.flush();
+        entityManager.refresh(user);
+        return user;
     }
 }

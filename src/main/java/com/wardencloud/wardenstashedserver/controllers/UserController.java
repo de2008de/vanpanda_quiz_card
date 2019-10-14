@@ -1,8 +1,6 @@
 package com.wardencloud.wardenstashedserver.controllers;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.wardencloud.wardenstashedserver.entities.User;
 import com.wardencloud.wardenstashedserver.jwt.annotations.PassToken;
 import com.wardencloud.wardenstashedserver.services.TokenService;
@@ -36,7 +34,7 @@ public class UserController {
 
     @PostMapping(value = "/login")
     @PassToken
-    public ResponseEntity login(@RequestBody Map<String, String> payload) {
+    public ResponseEntity<Object> login(@RequestBody Map<String, String> payload) {
         String email = payload.get("email");
         String password = payload.get("password");
         JSONObject jsonObject = new JSONObject();
@@ -72,7 +70,7 @@ public class UserController {
 
     @PostMapping(value = "/signup")
     @PassToken
-    public ResponseEntity signUp(@RequestBody Map<String, String> payload) {
+    public ResponseEntity<Object> signUp(@RequestBody Map<String, String> payload) {
         Map<String, String> errorMessages = new HashMap<>();
         JSONObject jsonObject = new JSONObject();
 
@@ -106,19 +104,23 @@ public class UserController {
             jsonObject.put(ERROR_MESSAGES_KEY, errorMessages);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(jsonObject);
         } else {
+            User user = userService.findUserById(userId);
+            String token = tokenService.getToken(user);
+            jsonObject.put(TOKEN_KEY, token);
             jsonObject.put(USER_ID_KEY, userId);
             return ResponseEntity.ok().body(jsonObject);
         }
     }
 
     @GetMapping(value = "/profile")
-    public ResponseEntity getUserProfile(@RequestHeader("token") String token) {
+    public ResponseEntity<Object> getUserProfile(@RequestHeader("token") String token) {
         JSONObject data = new JSONObject();
         JSONObject jsonObject = new JSONObject();
         int userId = tokenService.getUserIdFromToken(token);
         User user = userService.findUserById(userId);
         data.put("username", user.getUsername());
         data.put("email", user.getEmail());
+        data.put("credit", user.getCredit());
         jsonObject.put("data", data);
         return ResponseEntity.ok().body(jsonObject);
     }
