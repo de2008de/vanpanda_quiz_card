@@ -1,7 +1,9 @@
 package com.wardencloud.wardenstashedserver.helpers;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ConvertHelper {
     public static <T> List<T> castList(Class<? extends T> clazz, List<?> list) {
@@ -11,4 +13,16 @@ public class ConvertHelper {
         }
         return castedList;
     }
+
+    public static <K, V> List<Map<K, V>> castListOfMap(Class<K> keyClass, Class<V> valueClass, List<Map<?, ?>> list) {
+        List<Map<K, V>> castedList = new ArrayList<>();
+        for (Map<?, ?> map : list) {
+            Map<K, V> castedMap = new HashMap<>();
+            for (Map.Entry<?, ?> entry : map.entrySet()) {
+                castedMap.put(keyClass.cast(entry.getKey()), valueClass.cast(entry.getValue()));
+            }
+            castedList.add(castedMap);
+        } 
+        return castedList;
+    } 
 }
