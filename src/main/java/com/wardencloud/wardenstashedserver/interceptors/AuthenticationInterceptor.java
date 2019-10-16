@@ -5,7 +5,6 @@ import com.wardencloud.wardenstashedserver.jwt.annotations.PassToken;
 import com.wardencloud.wardenstashedserver.services.TokenService;
 import com.wardencloud.wardenstashedserver.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -21,11 +20,6 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
     @Autowired
     private TokenService tokenService;
 
-    @Value("${token.secret}")
-    private String tokenSecret;
-
-    private final String USER_DOES_NOT_EXIST_MESSAGE = "User does not exist";
-
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object object) throws Exception {
         if (!(object instanceof HandlerMethod)) {
@@ -38,13 +32,12 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         }
         String token = request.getHeader("token");
         if (token == null) {
-            // TODO: When we have an error, Spring will send a new error request without token. Therefore, throwing token empty exception here will confuse people. Should find a proper solution.
             return false;
         }
         int userId = tokenService.getUserIdFromToken(token);
         User user = userService.findUserById(userId);
         if (user == null) {
-            throw new RuntimeException(USER_DOES_NOT_EXIST_MESSAGE);
+            return false;
         }
         return true;
     }
