@@ -124,4 +124,17 @@ public class UserController {
         jsonObject.put("data", data);
         return ResponseEntity.ok().body(jsonObject);
     }
+
+    @GetMapping(value = "/profile/{id}")
+    public ResponseEntity<Object> getUserPublicProfile(@PathVariable int id) {
+        Map<String, Object> userPublicProfile = userService.getUserPublicProfileById(id);
+        if (userPublicProfile == null) {
+            JSONObject errorMessages = new JSONObject();
+            errorMessages.put(ERROR_MESSAGES_KEY, USER_NON_EXIST_MESSAGE);
+            return ResponseEntity.badRequest().body(errorMessages);
+        }
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("data", userPublicProfile);
+        return ResponseEntity.ok().body(jsonObject);
+    }
 }
