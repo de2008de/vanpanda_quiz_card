@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.wardencloud.wardenstashedserver.entities.ConceptCard;
 import com.wardencloud.wardenstashedserver.entities.StudyCard;
 import com.wardencloud.wardenstashedserver.helpers.ConvertHelper;
+import com.wardencloud.wardenstashedserver.jwt.annotations.PassToken;
 import com.wardencloud.wardenstashedserver.services.StudyCardService;
 import com.wardencloud.wardenstashedserver.services.TokenService;
 
@@ -30,6 +31,7 @@ public class CardController {
     private TokenService tokenService;
 
     @GetMapping(value = "/studycard")
+    @PassToken
     public ResponseEntity<Object> getAllStudyCards(Pageable pageable) {
         int pageNumber = pageable.getPageNumber();
         Page<StudyCard> page = studyCardService.findAllStudyCards(pageNumber);
@@ -71,6 +73,7 @@ public class CardController {
     }
 
     @GetMapping(value = "/studycard/{id}")
+    @PassToken
     public ResponseEntity<Object> getStudyCardById(@PathVariable int id) {
         JSONObject jsonObject = new JSONObject();
         StudyCard studyCard = studyCardService.getStudyCardById(id);
