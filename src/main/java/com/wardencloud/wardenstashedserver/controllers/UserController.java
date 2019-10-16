@@ -128,6 +128,7 @@ public class UserController {
     }
 
     @GetMapping(value = "/profile/{id}")
+    @PassToken
     public ResponseEntity<Object> getUserPublicProfile(@PathVariable int id) {
         Boolean isPrivateProfile = false;
         Map<String, Object> userPublicProfile = userService.getUserProfileById(id, isPrivateProfile);
