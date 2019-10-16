@@ -44,17 +44,23 @@ public class UserService {
         return userRepository.addCreditForUserById(id, credit);
     }
 
-    public Map<String, Object> getUserPublicProfileById(int id) {
-        String[] publicFields = new String[] { "id", "username", "description", "level", "verifiedIdentity" };
-        HashMap<String, Boolean> publicFieldsMap = new HashMap<>();
-        for (String field : publicFields) {
-            publicFieldsMap.put(field, true);
+    public Map<String, Object> getUserProfileById(int id, Boolean isPrivate) {
+        String[] fields = null;
+        if (isPrivate == true) {
+            fields = new String[] { "id", "username", "email", "level", "currentExp", "nextLevelExp", "credit", "verifiedIdentity" };
+        } else {
+            fields = new String[] { "id", "username", "description", "level", "verifiedIdentity" };
+        }
+        
+        HashMap<String, Boolean> fieldsMap = new HashMap<>();
+        for (String field : fields) {
+            fieldsMap.put(field, true);
         }
         User user = this.findUserById(id);
         if (user == null) {
             return null;
         }
-        Map<String, Object> userPublicProfile = new HashMap<>();
+        Map<String, Object> userProfile = new HashMap<>();
         Class<?> userClass = user.getClass();
         Method[] methods = userClass.getMethods();
         for (Method method : methods) {
@@ -64,9 +70,9 @@ public class UserService {
                 Character firstFieldNameChar = fieldName.charAt(0);
                 // Convert first character to lower case
                 fieldName = fieldName.replace(firstFieldNameChar.toString(), firstFieldNameChar.toString().toLowerCase());
-                if (publicFieldsMap.get(fieldName) != null) {
+                if (fieldsMap.get(fieldName) != null) {
                     try {
-                        userPublicProfile.put(fieldName, method.invoke(user));
+                        userProfile.put(fieldName, method.invoke(user));
                     } catch(IllegalAccessException | InvocationTargetException e) {
                         e.printStackTrace();
                     }
@@ -74,6 +80,6 @@ public class UserService {
                 }
             }
         }
-        return userPublicProfile;
+        return userProfile;
     }
 }

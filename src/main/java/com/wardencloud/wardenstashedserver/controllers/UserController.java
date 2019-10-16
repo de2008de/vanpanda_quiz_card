@@ -114,20 +114,23 @@ public class UserController {
 
     @GetMapping(value = "/profile")
     public ResponseEntity<Object> getUserProfile(@RequestHeader("token") String token) {
-        JSONObject data = new JSONObject();
-        JSONObject jsonObject = new JSONObject();
+        Boolean isPrivateProfile = true;
         int userId = tokenService.getUserIdFromToken(token);
-        User user = userService.findUserById(userId);
-        data.put("username", user.getUsername());
-        data.put("email", user.getEmail());
-        data.put("credit", user.getCredit());
-        jsonObject.put("data", data);
+        Map<String, Object> userPublicProfile = userService.getUserProfileById(userId, isPrivateProfile);
+        if (userPublicProfile == null) {
+            JSONObject errorMessages = new JSONObject();
+            errorMessages.put(ERROR_MESSAGES_KEY, USER_NON_EXIST_MESSAGE);
+            return ResponseEntity.badRequest().body(errorMessages);
+        }
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("data", userPublicProfile);
         return ResponseEntity.ok().body(jsonObject);
     }
 
     @GetMapping(value = "/profile/{id}")
     public ResponseEntity<Object> getUserPublicProfile(@PathVariable int id) {
-        Map<String, Object> userPublicProfile = userService.getUserPublicProfileById(id);
+        Boolean isPrivateProfile = false;
+        Map<String, Object> userPublicProfile = userService.getUserProfileById(id, isPrivateProfile);
         if (userPublicProfile == null) {
             JSONObject errorMessages = new JSONObject();
             errorMessages.put(ERROR_MESSAGES_KEY, USER_NON_EXIST_MESSAGE);

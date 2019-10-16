@@ -24,8 +24,6 @@ public class User {
     @JsonIgnore
     private String password;
 
-    private String description;
-
     @Column(name = "level", columnDefinition = "integer default 1")
     private int level;
 
@@ -104,14 +102,6 @@ public class User {
 
     public void addCredit(int credit) {
         this.credit += credit;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     public int getLevel() {
