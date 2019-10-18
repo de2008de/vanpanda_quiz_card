@@ -1,10 +1,17 @@
 package com.wardencloud.wardenstashedserver.services;
 
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import com.wardencloud.wardenstashedserver.entities.ConceptCard;
 import com.wardencloud.wardenstashedserver.entities.StudyCard;
 import com.wardencloud.wardenstashedserver.entities.User;
 import com.wardencloud.wardenstashedserver.repositories.StudyCardPagedJpaRepository;
 import com.wardencloud.wardenstashedserver.repositories.StudyCardRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
@@ -12,8 +19,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-
-import java.util.*;
 
 @Service
 @Qualifier("StudyCardServiceImpl")
@@ -38,7 +43,7 @@ public class StudyCardServiceImpl implements StudyCardService {
 
     public int addStudyCard(
             String title,
-            String subtitle,
+            String description,
             String school,
             Set<ConceptCard> conceptCards,
             int userId
@@ -47,14 +52,29 @@ public class StudyCardServiceImpl implements StudyCardService {
         if (user == null) {
             return -1;
         }
+        title = title.trim();
+        description = description.trim();
+        school = school.trim();
+        Iterator<ConceptCard> conceptCardIterator = conceptCards.iterator();
+        while (conceptCardIterator.hasNext()) {
+            ConceptCard card = conceptCardIterator.next();
+            sanitizeConceptCard(card);
+        }
         int studyCardId = studyCardRepository.addStudyCard(
                 title,
-                subtitle,
+                description,
                 school,
                 conceptCards,
                 user
         );
         return studyCardId;
+    }
+
+    private void sanitizeConceptCard(ConceptCard conceptCard) {
+        String title = conceptCard.getTitle();
+        String content = conceptCard.getContent();
+        conceptCard.setTitle(title.trim());
+        conceptCard.setContent(content.trim());
     }
 
     public Set<ConceptCard> convertListToConceptCardSet(List<Map<Object, Object>> list) {

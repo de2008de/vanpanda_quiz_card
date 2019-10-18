@@ -1,18 +1,19 @@
 package com.wardencloud.wardenstashedserver.services;
 
-import com.wardencloud.wardenstashedserver.entities.ConceptCard;
-import com.wardencloud.wardenstashedserver.entities.StudyCard;
-import org.springframework.data.domain.Page;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import com.wardencloud.wardenstashedserver.entities.ConceptCard;
+import com.wardencloud.wardenstashedserver.entities.StudyCard;
+
+import org.springframework.data.domain.Page;
 
 public interface StudyCardService {
     Page<StudyCard> findAllStudyCards(int pageNumber);
     int addStudyCard(
             String title,
-            String subtitle,
+            String description,
             String school,
             Set<ConceptCard> conceptCards,
             int userId
