@@ -30,6 +30,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(value = "/api/v1/card")
 public class CardController {
+    final private String ERROR_MESSAGE_KEY = "errorMessage";
+    final private String INPUT_INVALID = "Input is invalid";
+
     @Autowired
     @Qualifier("StudyCardServiceImpl")
     private StudyCardService studyCardService;
@@ -64,6 +67,11 @@ public class CardController {
         // TODO: Should we validate userId or should we assume it is correct?
         int userId = tokenService.getUserIdFromToken(token);
         int studyCardId = studyCardService.addStudyCard(title, description, school, conceptCardSet, userId);
+        if (studyCardId == -1) {
+            JSONObject errorObject = new JSONObject();
+            errorObject.put(ERROR_MESSAGE_KEY, INPUT_INVALID);
+            return ResponseEntity.badRequest().body(errorObject);
+        }
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("id", studyCardId);
         return ResponseEntity.ok().body(jsonObject);

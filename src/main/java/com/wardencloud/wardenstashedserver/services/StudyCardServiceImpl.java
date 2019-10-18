@@ -52,13 +52,26 @@ public class StudyCardServiceImpl implements StudyCardService {
         if (user == null) {
             return -1;
         }
+        if (title == null || description == null) {
+            return -1;
+        }
         title = title.trim();
         description = description.trim();
-        school = school.trim();
+        if (title.length() == 0 || description.length() == 0) {
+            return -1;
+        }
+        if (school != null) {
+            school = school.trim();
+            if (school.length() == 0) {
+                school = null;
+            }
+        }
         Iterator<ConceptCard> conceptCardIterator = conceptCards.iterator();
         while (conceptCardIterator.hasNext()) {
             ConceptCard card = conceptCardIterator.next();
-            sanitizeConceptCard(card);
+            if (!sanitizeAndValidateConceptCard(card)) {
+                return -1;
+            }
         }
         int studyCardId = studyCardRepository.addStudyCard(
                 title,
@@ -70,11 +83,20 @@ public class StudyCardServiceImpl implements StudyCardService {
         return studyCardId;
     }
 
-    private void sanitizeConceptCard(ConceptCard conceptCard) {
+    private boolean sanitizeAndValidateConceptCard(ConceptCard conceptCard) {
         String title = conceptCard.getTitle();
         String content = conceptCard.getContent();
-        conceptCard.setTitle(title.trim());
-        conceptCard.setContent(content.trim());
+        if (title == null || content == null) {
+            return false;
+        }
+        title = title.trim();
+        content = content.trim();
+        if (title.length() == 0 || content.length() == 0) {
+            return false;
+        }
+        conceptCard.setTitle(title);
+        conceptCard.setContent(content);
+        return true;
     }
 
     public Set<ConceptCard> convertListToConceptCardSet(List<Map<Object, Object>> list) {
