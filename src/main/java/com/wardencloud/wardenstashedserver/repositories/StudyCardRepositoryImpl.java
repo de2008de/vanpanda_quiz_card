@@ -1,5 +1,12 @@
 package com.wardencloud.wardenstashedserver.repositories;
 
+import java.util.List;
+import java.util.Set;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
+
 import com.wardencloud.wardenstashedserver.entities.ConceptCard;
 import com.wardencloud.wardenstashedserver.entities.StudyCard;
 import com.wardencloud.wardenstashedserver.entities.User;
@@ -8,12 +15,6 @@ import org.hibernate.MultiIdentifierLoadAccess;
 import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
-
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.transaction.Transactional;
-import java.util.List;
-import java.util.Set;
 
 @Repository
 @Transactional
@@ -24,14 +25,14 @@ public class StudyCardRepositoryImpl implements StudyCardRepository {
 
     public int addStudyCard(
             String title,
-            String subtitle,
+            String description,
             String school,
             Set<ConceptCard> conceptCards,
             User user
     ) {
         StudyCard studyCard = new StudyCard();
         studyCard.setTitle(title);
-        studyCard.setSubtitle(subtitle);
+        studyCard.setDescription(description);
         studyCard.setSchool(school);
         studyCard.setConceptCards(conceptCards);
         studyCard.setUser(user);

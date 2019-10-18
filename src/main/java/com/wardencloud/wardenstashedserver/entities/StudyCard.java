@@ -15,7 +15,7 @@ public class StudyCard implements Card {
 
     private String title;
 
-    private String subtitle;
+    private String description;
 
     private String school;
 
@@ -46,14 +46,6 @@ public class StudyCard implements Card {
 
     public void setTitle(String title) {
         this.title = title;
-    }
-
-    public String getSubtitle() {
-        return subtitle;
-    }
-
-    public void setSubtitle(String subtitle) {
-        this.subtitle = subtitle;
     }
 
     public String getSchool() {
@@ -96,5 +88,13 @@ public class StudyCard implements Card {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }
