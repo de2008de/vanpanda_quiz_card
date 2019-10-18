@@ -1,8 +1,8 @@
 INSERT INTO users (id, username, email, password) VALUES (1, 'david', 'david@gmail.com', '123');
 
-INSERT INTO study_cards (id, title, subtitle, school, user_id) VALUES (1, 'ECON 103', 'Chapter 1: Demand and Supply', 'sfu', 1);
-INSERT INTO study_cards (id, title, subtitle, school, user_id) VALUES (2, 'ECON 105', 'Chapter 1: Demand and Supply', 'sfu', 1);
-INSERT INTO study_cards (id, title, subtitle, school, user_id) VALUES (3, 'ECON 105', 'Chapter 2: Marginal Cost', 'sfu', 1);
+INSERT INTO study_cards (id, title, description, school, user_id) VALUES (1, 'ECON 103', 'Chapter 1: Demand and Supply', 'sfu', 1);
+INSERT INTO study_cards (id, title, description, school, user_id) VALUES (2, 'ECON 105', 'Chapter 1: Demand and Supply', 'sfu', 1);
+INSERT INTO study_cards (id, title, description, school, user_id) VALUES (3, 'ECON 105', 'Chapter 2: Marginal Cost', 'sfu', 1);
 
 INSERT INTO concept_cards (id, title, content) VALUES (1, 'What is Demand definition?', 'Demand refers to consumers'' desire to purchase goods and services at given prices.');
 INSERT INTO concept_cards (id, title, content) VALUES (2, 'What is Demand definition?', 'Demand refers to consumers'' desire to purchase goods and services at given prices.');
