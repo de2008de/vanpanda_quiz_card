@@ -9,10 +9,10 @@ public class ConceptCard implements Card{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    private String title;
+    private String term;
 
     @Column(columnDefinition = "TEXT")
-    private String content;
+    private String definition;
 
     public int getId() {
         return id;
@@ -22,19 +22,19 @@ public class ConceptCard implements Card{
         this.id = id;
     }
 
-    public String getTitle() {
-        return title;
+    public String getTerm() {
+        return term;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void setTerm(String term) {
+        this.term = term;
     }
 
-    public String getContent() {
-        return content;
+    public String getDefinition() {
+        return definition;
     }
 
-    public void setContent(String content) {
-        this.content = content;
+    public void setDefinition(String definition) {
+        this.definition = definition;
     }
 }

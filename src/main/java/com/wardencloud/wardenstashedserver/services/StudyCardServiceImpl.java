@@ -41,24 +41,24 @@ public class StudyCardServiceImpl implements StudyCardService {
         return studyCardPagedJpaRepository.findAll(usePageable);
     }
 
-    public int addStudyCard(
-            String title,
-            String description,
-            String school,
-            Set<ConceptCard> conceptCards,
-            int userId
-    ) {
+    public int addStudyCard(String title, String description, String school, Set<ConceptCard> conceptCards,
+            int userId) {
         User user = userService.findUserById(userId);
         if (user == null) {
             return -1;
         }
-        if (title == null || description == null) {
+        if (title == null) {
             return -1;
         }
         title = title.trim();
-        description = description.trim();
-        if (title.length() == 0 || description.length() == 0) {
+        if (title.length() == 0) {
             return -1;
+        }
+        if (description != null) {
+            description = description.trim();
+            if (description.length() == 0) {
+                description = null;
+            }
         }
         if (school != null) {
             school = school.trim();
@@ -73,36 +73,30 @@ public class StudyCardServiceImpl implements StudyCardService {
                 return -1;
             }
         }
-        int studyCardId = studyCardRepository.addStudyCard(
-                title,
-                description,
-                school,
-                conceptCards,
-                user
-        );
+        int studyCardId = studyCardRepository.addStudyCard(title, description, school, conceptCards, user);
         return studyCardId;
     }
 
     private boolean sanitizeAndValidateConceptCard(ConceptCard conceptCard) {
-        String title = conceptCard.getTitle();
-        String content = conceptCard.getContent();
-        if (title == null || content == null) {
+        String term = conceptCard.getTerm();
+        String definition = conceptCard.getDefinition();
+        if (term == null || definition == null) {
             return false;
         }
-        title = title.trim();
-        content = content.trim();
-        if (title.length() == 0 || content.length() == 0) {
+        term = term.trim();
+        definition = definition.trim();
+        if (term.length() == 0 || definition.length() == 0) {
             return false;
         }
-        conceptCard.setTitle(title);
-        conceptCard.setContent(content);
+        conceptCard.setTerm(term);
+        conceptCard.setDefinition(definition);
         return true;
     }
 
     public Set<ConceptCard> convertListToConceptCardSet(List<Map<Object, Object>> list) {
         Iterator<Map<Object, Object>> iterator = list.listIterator();
         Set<ConceptCard> conceptCardSet = new HashSet<>();
-        while(iterator.hasNext()) {
+        while (iterator.hasNext()) {
             ConceptCard conceptCard = convertMapToConceptCard(iterator.next());
             conceptCardSet.add(conceptCard);
         }
@@ -111,8 +105,8 @@ public class StudyCardServiceImpl implements StudyCardService {
 
     public ConceptCard convertMapToConceptCard(Map<Object, Object> map) {
         ConceptCard conceptCard = new ConceptCard();
-        conceptCard.setTitle((String) map.get("title"));
-        conceptCard.setContent((String) map.get("content"));
+        conceptCard.setTerm((String) map.get("term"));
+        conceptCard.setDefinition((String) map.get("definition"));
         return conceptCard;
     }
 
