@@ -35,6 +35,8 @@ public class StudyCardServiceImpl implements StudyCardService {
 
     private int pageSize = 10;
     private Sort sortRule = Sort.by(Sort.Order.desc("id"));
+    private int termLengthLimit = 100;
+    private int definitionLengthLimit = 300;
 
     public Page<StudyCard> findAllStudyCards(int pageNumber) {
         Pageable usePageable = PageRequest.of(pageNumber, pageSize, sortRule);
@@ -86,6 +88,9 @@ public class StudyCardServiceImpl implements StudyCardService {
         term = term.trim();
         definition = definition.trim();
         if (term.length() == 0 || definition.length() == 0) {
+            return false;
+        }
+        if (term.length() > termLengthLimit || definition.length() > definitionLengthLimit) {
             return false;
         }
         conceptCard.setTerm(term);

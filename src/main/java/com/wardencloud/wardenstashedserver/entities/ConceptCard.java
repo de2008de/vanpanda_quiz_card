@@ -1,6 +1,11 @@
 package com.wardencloud.wardenstashedserver.entities;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 @Entity
 @Table(name = "ConceptCards")
@@ -9,9 +14,10 @@ public class ConceptCard implements Card{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @Column(columnDefinition = "CHAR(100)")
     private String term;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "CHAR(300)")
     private String definition;
 
     public int getId() {
