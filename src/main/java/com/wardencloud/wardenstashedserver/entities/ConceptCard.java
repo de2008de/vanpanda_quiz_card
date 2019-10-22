@@ -9,7 +9,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "ConceptCards")
-public class ConceptCard implements Card{
+public class ConceptCard implements Card {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
