@@ -35,6 +35,11 @@ public class StudyCardServiceImpl implements StudyCardService {
 
     private int pageSize = 10;
     private Sort sortRule = Sort.by(Sort.Order.desc("id"));
+    private int termLengthLimit = 100;
+    private int definitionLengthLimit = 300;
+    private int titleLengthLimit = 100;
+    private int descriptionLengthLimit = 300;
+    private int schoolLengthLimit = 100;
 
     public Page<StudyCard> findAllStudyCards(int pageNumber) {
         Pageable usePageable = PageRequest.of(pageNumber, pageSize, sortRule);
@@ -51,19 +56,23 @@ public class StudyCardServiceImpl implements StudyCardService {
             return -1;
         }
         title = title.trim();
-        if (title.length() == 0) {
+        if (title.length() == 0 || title.length() > titleLengthLimit) {
             return -1;
         }
         if (description != null) {
             description = description.trim();
             if (description.length() == 0) {
                 description = null;
+            } else if (description.length() > descriptionLengthLimit) {
+                return -1;
             }
         }
         if (school != null) {
             school = school.trim();
             if (school.length() == 0) {
                 school = null;
+            } else if (school.length() > schoolLengthLimit) {
+                return -1;
             }
         }
         Iterator<ConceptCard> conceptCardIterator = conceptCards.iterator();
@@ -86,6 +95,9 @@ public class StudyCardServiceImpl implements StudyCardService {
         term = term.trim();
         definition = definition.trim();
         if (term.length() == 0 || definition.length() == 0) {
+            return false;
+        }
+        if (term.length() > termLengthLimit || definition.length() > definitionLengthLimit) {
             return false;
         }
         conceptCard.setTerm(term);
