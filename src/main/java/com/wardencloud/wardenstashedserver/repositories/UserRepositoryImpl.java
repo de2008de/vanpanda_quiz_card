@@ -46,7 +46,7 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public User addUser(String username, String email, String password) {
         try {
-            int numUpdated = entityManager.createNativeQuery("INSERT INTO Users (username, email, password) VALUES (:username, :email, :password)", User.class)
+            int numUpdated = entityManager.createNativeQuery("INSERT INTO users (username, email, password) VALUES (:username, :email, :password)", User.class)
                     .setParameter("username", username)
                     .setParameter("email", email)
                     .setParameter("password", password)
