@@ -26,7 +26,7 @@ public class StudyCard implements Card {
     @Column(columnDefinition = "CHAR(100)")
     private String title;
 
-    @Column(columnDefinition = "CHAR(300)")
+    @Column(columnDefinition = "CHAR(255)")
     private String description;
 
     @Column(columnDefinition = "CHAR(100)")

@@ -26,7 +26,7 @@ public class BookmarkRepositoryImpl implements BookmarkRepository {
 
     public List<Bookmark> getBookmarkByUserId(int id) {
         try {
-            List<?> uncastedBookmarkList = entityManager.createNativeQuery("SELECT * FROM Bookmarks b JOIN USERS_BOOKMARKS ub ON ub.bookmarks_id = b.id JOIN USERS u ON u.id = ub.user_id WHERE u.id = :id", Bookmark.class)
+            List<?> uncastedBookmarkList = entityManager.createNativeQuery("SELECT * FROM bookmarks b JOIN users_bookmarks ub ON ub.bookmarks_id = b.id JOIN users u ON u.id = ub.user_id WHERE u.id = :id", Bookmark.class)
                     .setParameter("id", id)
                     .getResultList();
             List<Bookmark> castedBookmarkList = ConvertHelper.castList(

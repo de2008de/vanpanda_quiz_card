@@ -6,7 +6,7 @@ import javax.persistence.*;
 import java.util.Set;
 
 @Entity
-@Table(name = "Users")
+@Table(name = "users")
 public class User {
     @Transient
     final private int DEFAULT_NEXT_LEVEL_EXP = 10;

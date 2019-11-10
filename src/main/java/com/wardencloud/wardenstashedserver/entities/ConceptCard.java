@@ -17,7 +17,7 @@ public class ConceptCard implements Card {
     @Column(columnDefinition = "CHAR(100)")
     private String term;
 
-    @Column(columnDefinition = "CHAR(300)")
+    @Column(columnDefinition = "CHAR(255)")
     private String definition;
 
     public int getId() {
