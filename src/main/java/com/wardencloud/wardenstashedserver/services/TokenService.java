@@ -40,8 +40,7 @@ public class TokenService {
             // TODO: Do not throw exception when token is invalid, should return an error response
             decodedJWT = jwtVerifier.verify(token);
         } catch (JWTVerificationException e) {
-            String exceptionMessage = e.getMessage();
-            throw new RuntimeException(exceptionMessage);
+            return -1;
         }
 
         List<String> audiences = decodedJWT.getAudience();

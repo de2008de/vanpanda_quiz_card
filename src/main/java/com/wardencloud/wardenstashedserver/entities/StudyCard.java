@@ -1,10 +1,20 @@
 package com.wardencloud.wardenstashedserver.entities;
 
-import javax.persistence.*;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
+import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import java.util.Set;
 
 @Entity
 @Table(name = "StudyCards")
@@ -13,14 +23,17 @@ public class StudyCard implements Card {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @Column(columnDefinition = "CHAR(100)")
     private String title;
 
-    private String subtitle;
+    @Column(columnDefinition = "CHAR(255)")
+    private String description;
 
+    @Column(columnDefinition = "CHAR(100)")
     private String school;
 
     @OrderBy("id asc")
-    @OneToMany(cascade = {CascadeType.ALL})
+    @OneToMany(cascade = { CascadeType.ALL })
     private Set<ConceptCard> conceptCards;
 
     @JsonIgnore
@@ -46,14 +59,6 @@ public class StudyCard implements Card {
 
     public void setTitle(String title) {
         this.title = title;
-    }
-
-    public String getSubtitle() {
-        return subtitle;
-    }
-
-    public void setSubtitle(String subtitle) {
-        this.subtitle = subtitle;
     }
 
     public String getSchool() {
@@ -96,5 +101,13 @@ public class StudyCard implements Card {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }
