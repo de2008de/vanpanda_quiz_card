@@ -4,9 +4,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.http.HttpServletRequest;
+
 import com.alibaba.fastjson.JSONObject;
 import com.wardencloud.wardenstashedserver.entities.ConceptCard;
 import com.wardencloud.wardenstashedserver.entities.StudyCard;
+import com.wardencloud.wardenstashedserver.es.entities.EsStudyCard;
+import com.wardencloud.wardenstashedserver.es.services.EsStudyCardService;
 import com.wardencloud.wardenstashedserver.helpers.ConvertHelper;
 import com.wardencloud.wardenstashedserver.jwt.annotations.PassToken;
 import com.wardencloud.wardenstashedserver.services.StudyCardService;
@@ -39,6 +43,9 @@ public class CardController {
 
     @Autowired
     private TokenService tokenService;
+
+    @Autowired
+    private EsStudyCardService esStudyCardService;
 
     @GetMapping(value = "/studycard")
     @PassToken
@@ -83,6 +90,16 @@ public class CardController {
         JSONObject jsonObject = new JSONObject();
         StudyCard studyCard = studyCardService.getStudyCardById(id);
         jsonObject.put("data", studyCard);
+        return ResponseEntity.ok().body(jsonObject);
+    }
+
+    @GetMapping(value = "/search/studycard")
+    @PassToken
+    public ResponseEntity<Object> search(HttpServletRequest request) {
+        String content = request.getParameter("content");
+        List<EsStudyCard> studyCards = esStudyCardService.search(content);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("data", studyCards);
         return ResponseEntity.ok().body(jsonObject);
     }
 }
