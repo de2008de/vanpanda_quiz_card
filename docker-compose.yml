@@ -50,10 +50,10 @@ services:
 
   logstash1:
     build:
-      context: logstash/
+      context: docker/logstash/
     volumes:
       - type: bind
-        source: ./logstash/pipeline
+        source: ./docker/logstash/pipeline
         target: /usr/share/logstash/pipeline
         read_only: true
     ports:
