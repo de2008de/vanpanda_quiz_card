@@ -20,7 +20,9 @@ public class EsStudyCardService {
     @Autowired
     private JestClient jestClient;
 
-    public List<EsStudyCard> search(String content) {
+    public List<EsStudyCard> search(String content, int pageNumber) {
+        final int pageSize = 4;
+        int baseIndex = pageNumber * pageSize;
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.query(
             QueryBuilders
@@ -28,7 +30,9 @@ public class EsStudyCardService {
             .should(QueryBuilders.matchQuery("title", content).fuzziness("10").operator(Operator.OR))
             .should(QueryBuilders.matchQuery("description", content).fuzziness("10").operator(Operator.OR))
             .minimumShouldMatch(1)
-        );
+        )
+        .from(baseIndex)
+        .size(pageSize);
         Search search = new Search
                             .Builder(searchSourceBuilder.toString())
                             .addIndex("cards")
