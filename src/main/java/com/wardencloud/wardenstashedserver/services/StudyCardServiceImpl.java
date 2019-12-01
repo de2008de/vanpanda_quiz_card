@@ -129,4 +129,9 @@ public class StudyCardServiceImpl implements StudyCardService {
     public List<ConceptCard> getConceptCardsByIds(List<Integer> ids) {
         return studyCardRepository.getConceptCardsByIds(ids);
     }
+
+    public Page<StudyCard> getMyStudyCards(User user, int pageNumber) {
+        Pageable usePageable = PageRequest.of(pageNumber, pageSize, sortRule);
+        return studyCardPagedJpaRepository.findByUser(user, usePageable);
+    }
 }

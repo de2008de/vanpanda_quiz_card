@@ -6,6 +6,7 @@ import java.util.Set;
 
 import com.wardencloud.wardenstashedserver.entities.ConceptCard;
 import com.wardencloud.wardenstashedserver.entities.StudyCard;
+import com.wardencloud.wardenstashedserver.entities.User;
 
 import org.springframework.data.domain.Page;
 
@@ -22,4 +23,5 @@ public interface StudyCardService {
     ConceptCard convertMapToConceptCard(Map<Object, Object> map);
     StudyCard getStudyCardById(int id);
     List<ConceptCard> getConceptCardsByIds(List<Integer> ids);
+    Page<StudyCard> getMyStudyCards(User user, int pageNumber);
 }

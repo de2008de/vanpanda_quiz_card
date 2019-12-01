@@ -9,12 +9,14 @@ import javax.servlet.http.HttpServletRequest;
 import com.alibaba.fastjson.JSONObject;
 import com.wardencloud.wardenstashedserver.entities.ConceptCard;
 import com.wardencloud.wardenstashedserver.entities.StudyCard;
+import com.wardencloud.wardenstashedserver.entities.User;
 import com.wardencloud.wardenstashedserver.es.entities.EsStudyCard;
 import com.wardencloud.wardenstashedserver.es.services.EsStudyCardService;
 import com.wardencloud.wardenstashedserver.helpers.ConvertHelper;
 import com.wardencloud.wardenstashedserver.jwt.annotations.PassToken;
 import com.wardencloud.wardenstashedserver.services.StudyCardService;
 import com.wardencloud.wardenstashedserver.services.TokenService;
+import com.wardencloud.wardenstashedserver.services.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -36,6 +38,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class CardController {
     final private String ERROR_MESSAGE_KEY = "errorMessage";
     final private String INPUT_INVALID = "Input is invalid";
+    final private String USER_INVALID = "User is invalid. Please login again.";
 
     @Autowired
     @Qualifier("StudyCardServiceImpl")
@@ -46,6 +49,9 @@ public class CardController {
 
     @Autowired
     private EsStudyCardService esStudyCardService;
+
+    @Autowired
+    private UserService userService;
 
     @GetMapping(value = "/studycard")
     @PassToken
@@ -71,9 +77,13 @@ public class CardController {
                 uncastedConceptCardList);
 
         Set<ConceptCard> conceptCardSet = studyCardService.convertListToConceptCardSet(conceptCardMapList);
-        // TODO: Should we validate userId or should we assume it is correct?
         int userId = tokenService.getUserIdFromToken(token);
         int studyCardId = studyCardService.addStudyCard(title, description, school, conceptCardSet, userId);
+        if (userId == -1) {
+            JSONObject errorObject = new JSONObject();
+            errorObject.put(ERROR_MESSAGE_KEY, USER_INVALID);
+            return ResponseEntity.badRequest().body(errorObject);
+        }
         if (studyCardId == -1) {
             JSONObject errorObject = new JSONObject();
             errorObject.put(ERROR_MESSAGE_KEY, INPUT_INVALID);
@@ -102,5 +112,22 @@ public class CardController {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("data", studyCards);
         return ResponseEntity.ok().body(jsonObject);
+    }
+
+    @GetMapping(value = "/my_study_cards")
+    public ResponseEntity<Object> getMyStudyCards(@RequestHeader("token") String token, Pageable pageable) {
+        int userId = tokenService.getUserIdFromToken(token);
+        if (userId == -1) {
+            JSONObject errorObject = new JSONObject();
+            errorObject.put(ERROR_MESSAGE_KEY, USER_INVALID);
+            return ResponseEntity.badRequest().body(errorObject);
+        }
+        User user = userService.findUserById(userId);
+        int pageNumber = pageable.getPageNumber();
+        Page<StudyCard> studyCardsPage = studyCardService.getMyStudyCards(user, pageNumber);
+        List<StudyCard> studyCards = studyCardsPage.getContent();
+        JSONObject jsonpObject = new JSONObject();
+        jsonpObject.put("data", studyCards);
+        return ResponseEntity.ok().body(jsonpObject);
     }
 }
