@@ -22,6 +22,10 @@ public interface StudyCardService {
     Set<ConceptCard> convertListToConceptCardSet(List<Map<Object, Object>> list);
     ConceptCard convertMapToConceptCard(Map<Object, Object> map);
     StudyCard getStudyCardById(int id);
+    List<StudyCard> getStudyCardByIds(List<Integer> ids);
     List<ConceptCard> getConceptCardsByIds(List<Integer> ids);
-    Page<StudyCard> getMyStudyCards(User user, int pageNumber);
+    Page<StudyCard> getStudyCardsCreatedByMe(User user, int pageNumber);
+    List<Integer> getMyStudyCards(int userId, int pageNumber);
+    void collectStudyCard(int userId, int studyCardId);
+    void removeStudyCardFromMyCollectionById(int userId, int studyCardId);
 }

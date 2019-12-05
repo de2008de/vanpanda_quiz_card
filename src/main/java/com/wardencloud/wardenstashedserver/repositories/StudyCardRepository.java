@@ -16,5 +16,6 @@ public interface StudyCardRepository {
             User user
     );
     StudyCard getStudyCardById(int id);
+    List<StudyCard> getStudyCardByIds(List<Integer> ids);
     List<ConceptCard> getConceptCardsByIds(List<Integer> ids);
 }

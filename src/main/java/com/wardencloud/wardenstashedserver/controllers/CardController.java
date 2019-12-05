@@ -1,5 +1,6 @@
 package com.wardencloud.wardenstashedserver.controllers;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -24,6 +25,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -114,8 +116,8 @@ public class CardController {
         return ResponseEntity.ok().body(jsonObject);
     }
 
-    @GetMapping(value = "/my_study_cards")
-    public ResponseEntity<Object> getMyStudyCards(@RequestHeader("token") String token, Pageable pageable) {
+    @GetMapping(value = "/study_cards_created_by_me")
+    public ResponseEntity<Object> getStudyCardsCreatedByMe(@RequestHeader("token") String token, Pageable pageable) {
         int userId = tokenService.getUserIdFromToken(token);
         if (userId == -1) {
             JSONObject errorObject = new JSONObject();
@@ -124,10 +126,52 @@ public class CardController {
         }
         User user = userService.findUserById(userId);
         int pageNumber = pageable.getPageNumber();
-        Page<StudyCard> studyCardsPage = studyCardService.getMyStudyCards(user, pageNumber);
+        Page<StudyCard> studyCardsPage = studyCardService.getStudyCardsCreatedByMe(user, pageNumber);
         List<StudyCard> studyCards = studyCardsPage.getContent();
         JSONObject jsonpObject = new JSONObject();
         jsonpObject.put("data", studyCards);
         return ResponseEntity.ok().body(jsonpObject);
+    }
+
+    @GetMapping(value = "/my_study_cards")
+    public ResponseEntity<Object> getMyStudyCards(@RequestHeader("token") String token, Pageable pageable) {
+        int userId = tokenService.getUserIdFromToken(token);
+        if (userId == -1) {
+            JSONObject errorObject = new JSONObject();
+            errorObject.put(ERROR_MESSAGE_KEY, USER_INVALID);
+            return ResponseEntity.badRequest().body(errorObject);
+        }
+        int pageNumber = pageable.getPageNumber();
+        List<Integer> studyCardIds = studyCardService.getMyStudyCards(userId, pageNumber);
+        List<StudyCard> studyCards = studyCardService.getStudyCardByIds(studyCardIds);
+        JSONObject response = new JSONObject();
+        response.put("data", studyCards);
+        return ResponseEntity.ok().body(response);
+    }
+
+    @PostMapping(value = "/my_study_cards")
+    public ResponseEntity<Object> collectStudyCards(@RequestHeader("token") String token, @RequestBody Map<String, String> payload) {
+        int userId = tokenService.getUserIdFromToken(token);
+        int studyCardId = Integer.parseInt(payload.get("studyCardId"));
+        studyCardService.collectStudyCard(userId, studyCardId);
+        JSONObject response = new JSONObject();
+        JSONObject data = new JSONObject();
+        data.put("userId", userId);
+        data.put("studyCardId", studyCardId);
+        response.put("data", data);
+        return ResponseEntity.ok().body(response);
+    }
+
+    @DeleteMapping(value = "/my_study_cards")
+    public ResponseEntity<Object> removeStudyCardFromMyCollection(@RequestHeader("token") String token, @RequestBody Map<String, String> payload) {
+        int userId = tokenService.getUserIdFromToken(token);
+        int studyCardId = Integer.parseInt(payload.get("studyCardId"));
+        studyCardService.removeStudyCardFromMyCollectionById(userId, studyCardId);
+        JSONObject response = new JSONObject();
+        JSONObject data = new JSONObject();
+        data.put("userId", userId);
+        data.put("studyCardId", studyCardId);
+        response.put("data", data);
+        return ResponseEntity.ok().body(response);
     }
 }

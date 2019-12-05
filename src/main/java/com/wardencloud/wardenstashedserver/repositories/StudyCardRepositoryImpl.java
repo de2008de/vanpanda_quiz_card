@@ -46,8 +46,14 @@ public class StudyCardRepositoryImpl implements StudyCardRepository {
         return entityManager.find(StudyCard.class, id);
     }
 
+    public List<StudyCard> getStudyCardByIds(List<Integer> ids) {
+        Session session = entityManager.unwrap(Session.class);
+        MultiIdentifierLoadAccess<StudyCard> multiIdentifierLoadAccess = session.byMultipleIds(StudyCard.class);
+        List<StudyCard> studyCards = multiIdentifierLoadAccess.multiLoad(ids);
+        return studyCards;
+    }
+
     public List<ConceptCard> getConceptCardsByIds(List<Integer> ids) {
-        // Use batch processing to improve performance
         Session session = entityManager.unwrap(Session.class);
         MultiIdentifierLoadAccess<ConceptCard> multiIdentifierLoadAccess = session.byMultipleIds(ConceptCard.class);
         List<ConceptCard> conceptCards = multiIdentifierLoadAccess.multiLoad(ids);
