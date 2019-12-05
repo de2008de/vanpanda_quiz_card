@@ -46,6 +46,11 @@ public class StudyCardRepositoryImpl implements StudyCardRepository {
         return entityManager.find(StudyCard.class, id);
     }
 
+    public void deleteStudyCardById(int id) {
+        StudyCard studyCard = getStudyCardById(id);
+        entityManager.remove(studyCard);
+    }
+
     public List<StudyCard> getStudyCardByIds(List<Integer> ids) {
         Session session = entityManager.unwrap(Session.class);
         MultiIdentifierLoadAccess<StudyCard> multiIdentifierLoadAccess = session.byMultipleIds(StudyCard.class);

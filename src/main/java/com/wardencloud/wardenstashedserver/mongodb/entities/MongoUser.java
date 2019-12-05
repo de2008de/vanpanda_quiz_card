@@ -32,7 +32,7 @@ public class MongoUser {
     }
 
     public void addOwnedStudyCardById(int id) {
-        ownedStudyCards.add(id);
+        ownedStudyCards.add(0, id);
     }
 
     public void deleteOwnedStudyCardById(int id) {

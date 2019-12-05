@@ -190,5 +190,20 @@ public class StudyCardServiceImpl implements StudyCardService {
         }
         mongoUser.deleteOwnedStudyCardById(studyCardId);
         mongoTemplate.save(mongoUser);
+        StudyCard studyCard = studyCardRepository.getStudyCardById(studyCardId);
+        int creatorUserId = studyCard.getUserId();
+        if (userId == creatorUserId) {
+            deleteStudyCardCreatedByMe(userId, studyCardId);
+        }
+    }
+
+    private void deleteStudyCardCreatedByMe(int userId, int studyCardId) {
+        StudyCard studyCard = studyCardRepository.getStudyCardById(studyCardId);
+        int creatorUserId = studyCard.getUserId();
+        if (userId != creatorUserId) {
+            return;
+        } else {
+            studyCardRepository.deleteStudyCardById(studyCardId);
+        }
     }
 }
