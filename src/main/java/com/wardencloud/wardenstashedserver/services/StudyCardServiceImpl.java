@@ -197,6 +197,17 @@ public class StudyCardServiceImpl implements StudyCardService {
         }
     }
 
+    public boolean isStudyCardCollected(int userId, int studyCardId) {
+        Query query = Query.query(Criteria.where("id").is(userId));
+        MongoUser mongoUser = mongoTemplate.findOne(query, MongoUser.class);
+        if (mongoUser == null) {
+            mongoUser = userService.addMongoUser(userId);
+        }
+        List<Integer> studyCardIds = mongoUser.getOwnedStudyCards();
+        boolean doesOwnStudyCard = studyCardIds.contains(studyCardId);
+        return doesOwnStudyCard;
+    }
+
     private void deleteStudyCardCreatedByMe(int userId, int studyCardId) {
         StudyCard studyCard = studyCardRepository.getStudyCardById(studyCardId);
         int creatorUserId = studyCard.getUserId();

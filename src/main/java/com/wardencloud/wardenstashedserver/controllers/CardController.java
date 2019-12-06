@@ -98,9 +98,17 @@ public class CardController {
 
     @GetMapping(value = "/studycard/{id}")
     @PassToken
-    public ResponseEntity<Object> getStudyCardById(@PathVariable int id) {
+    public ResponseEntity<Object> getStudyCardById(@RequestHeader("token") String token, @PathVariable int id) {
         JSONObject jsonObject = new JSONObject();
         StudyCard studyCard = studyCardService.getStudyCardById(id);
+        int userId = tokenService.getUserIdFromToken(token);
+        JSONObject metadata = new JSONObject();
+        boolean isCollected = false;
+        if (userId != -1) {
+            isCollected = studyCardService.isStudyCardCollected(userId, id);
+        }
+        metadata.put("isCollected", isCollected);
+        jsonObject.put("metadata", metadata);
         jsonObject.put("data", studyCard);
         return ResponseEntity.ok().body(jsonObject);
     }

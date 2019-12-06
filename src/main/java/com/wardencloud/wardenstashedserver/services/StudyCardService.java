@@ -28,4 +28,5 @@ public interface StudyCardService {
     List<Integer> getMyStudyCards(int userId, int pageNumber);
     void collectStudyCard(int userId, int studyCardId);
     void removeStudyCardFromMyCollectionById(int userId, int studyCardId);
+    boolean isStudyCardCollected(int userId, int studyCardId);
 }
