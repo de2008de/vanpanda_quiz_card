@@ -9,14 +9,19 @@ import com.wardencloud.wardenstashedserver.entities.User;
 import com.wardencloud.wardenstashedserver.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 import com.wardencloud.wardenstashedserver.helpers.ReflectionHelper;
+import com.wardencloud.wardenstashedserver.mongodb.entities.MongoUser;
 
 @Service
 public class UserService {
     @Autowired
     @Qualifier("UserRepositoryImpl")
     private UserRepository userRepository;
+
+    @Autowired
+    private MongoTemplate mongoTemplate;
 
     public User findUserById(int id) {
         return userRepository.findById(id);
@@ -33,11 +38,21 @@ public class UserService {
     public int addUser(String username, String email, String password) {
         // TODO: password should be encrypted before inserting it into DB
         User user = userRepository.addUser(username, email, password);
-        if (user == null) {
+        MongoUser mongoUser = new MongoUser();
+        mongoUser.setId(user.getId());
+        MongoUser insertedMongoUser = mongoTemplate.insert(mongoUser);
+        if (user == null || insertedMongoUser == null) {
             return -1;
         } else {
             return user.getId();
         }
+    }
+
+    public MongoUser addMongoUser(int userId) {
+        MongoUser mongoUser = new MongoUser();
+        mongoUser.setId(userId);
+        mongoTemplate.insert(mongoUser);
+        return mongoUser;
     }
 
     public User addCreditForUserById(int id, int credit) {
