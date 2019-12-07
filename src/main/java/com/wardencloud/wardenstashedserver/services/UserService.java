@@ -3,20 +3,35 @@ package com.wardencloud.wardenstashedserver.services;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
 
+import com.alibaba.fastjson.JSONObject;
 import com.wardencloud.wardenstashedserver.entities.User;
 import com.wardencloud.wardenstashedserver.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 import com.wardencloud.wardenstashedserver.helpers.ReflectionHelper;
+import com.wardencloud.wardenstashedserver.mongodb.entities.MongoUser;
 
 @Service
 public class UserService {
     @Autowired
     @Qualifier("UserRepositoryImpl")
     private UserRepository userRepository;
+
+    @Autowired
+    private MongoTemplate mongoTemplate;
+
+    private final int EMAIL_MAX_LENGTH = 100;
+    private final int USERNAME_MIN_LENGTH = 4;
+    private final int USERNAME_MAX_LENGTH = 16;
+    private final int PASSWORD_MIN_LENGTH = 6;
+    private final int PASSWORD_MAX_LENGTH = 16;
 
     public User findUserById(int id) {
         return userRepository.findById(id);
@@ -30,14 +45,68 @@ public class UserService {
         return userRepository.findByUserEmail(email);
     }
 
-    public int addUser(String username, String email, String password) {
+    public JSONObject addUser(String username, String email, String password) {
         // TODO: password should be encrypted before inserting it into DB
-        User user = userRepository.addUser(username, email, password);
-        if (user == null) {
-            return -1;
-        } else {
-            return user.getId();
+        JSONObject result = new JSONObject();
+        JSONObject errorMessages = new JSONObject();
+        String trimUsername = username.trim();
+        String trimEmail = email.trim();
+        JSONObject validationResult = validateSignUpInput(trimUsername, trimEmail, password);
+        boolean isUsernameValid = (boolean) validationResult.get("success");
+        if (!isUsernameValid) {
+            Set<Map.Entry<String, Object>> validationErrorMessages = validationResult
+                                                            .getJSONObject("errorMessages")
+                                                            .entrySet();
+            Iterator<Map.Entry<String, Object>> errorMessagesIterator = validationErrorMessages.iterator();
+            while(errorMessagesIterator.hasNext()) {
+                Map.Entry<String, Object> errorMessagesEntry = errorMessagesIterator.next();
+                String errorMessageKey = errorMessagesEntry.getKey();
+                Object errorMessageValue = errorMessagesEntry.getValue();
+                errorMessages.put(errorMessageKey, errorMessageValue);
+            }
+            result.put("success", false);
+            result.put("errorMessages", errorMessages);
+            return result;
         }
+
+        User existingUser = null;
+        existingUser = findUserByEmail(trimEmail);
+        if (existingUser != null) {
+            result.put("success", false);
+            errorMessages.put("email", "is already being used");
+            result.put("errorMessages", errorMessages);
+            return result;
+        }
+
+        existingUser = findUserByUsername(trimUsername);
+        if (existingUser != null) {
+            result.put("success", false);
+            errorMessages.put("username", "is already being used");
+            result.put("errorMessages", errorMessages);
+            return result;
+        }
+
+        User user = userRepository.addUser(trimUsername, trimEmail, password);
+        MongoUser mongoUser = new MongoUser();
+        mongoUser.setId(user.getId());
+        MongoUser insertedMongoUser = mongoTemplate.insert(mongoUser);
+        if (user == null || insertedMongoUser == null) {
+            errorMessages.put("general", "failed to add new user");
+            result.put("success", false);
+            result.put("errorMessages", errorMessages);
+            return result;
+        } else {
+            result.put("success", true);
+            result.put("userId", user.getId());
+            return result;
+        }
+    }
+
+    public MongoUser addMongoUser(int userId) {
+        MongoUser mongoUser = new MongoUser();
+        mongoUser.setId(userId);
+        mongoTemplate.insert(mongoUser);
+        return mongoUser;
     }
 
     public User addCreditForUserById(int id, int credit) {
@@ -81,5 +150,47 @@ public class UserService {
             }
         }
         return userProfile;
+    }
+
+    private JSONObject validateSignUpInput(String username, String email, String password) {
+        JSONObject result = new JSONObject();
+        JSONObject errorMessages = new JSONObject();
+
+        String trimUsername = username.trim();
+        String usernamePattern = "^[a-zA-Z0-9]+$";
+        boolean isUsernameMatch = Pattern.matches(usernamePattern, trimUsername);
+        if (trimUsername.length() == 0) {
+            errorMessages.put("username", "is required");
+        } else if (trimUsername.length() < USERNAME_MIN_LENGTH || trimUsername.length() > USERNAME_MAX_LENGTH) {
+            errorMessages.put("username", "must between " + USERNAME_MIN_LENGTH + " and " + USERNAME_MAX_LENGTH);
+        } else if (!isUsernameMatch) {
+            errorMessages.put("username", "alphanimeric only");
+        }
+        
+        String trimEmail = email.trim();
+        String emailPattern = "^[a-zA-Z0-9_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$";
+        boolean isEmailMatch = Pattern.matches(emailPattern, trimEmail);
+        if (trimEmail.length() == 0) {
+            errorMessages.put("email", "is required");
+        } else if (trimEmail.length() > EMAIL_MAX_LENGTH) {
+            errorMessages.put("email", "is too long");
+        } else if (!isEmailMatch) {
+            errorMessages.put("email", "format is incorrect");
+        }
+
+        if (password.length() == 0) {
+            errorMessages.put("password", "is required");
+        } else if (password.length() < PASSWORD_MIN_LENGTH || password.length() > PASSWORD_MAX_LENGTH) {
+            errorMessages.put("password", "must between " + PASSWORD_MIN_LENGTH + " and " + PASSWORD_MAX_LENGTH);
+        }
+
+        if (!errorMessages.isEmpty()) {
+            result.put("success", false);
+            result.put("errorMessages", errorMessages);
+        } else {
+            result.put("success", true);
+        }
+
+        return result;
     }
 }

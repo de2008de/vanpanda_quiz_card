@@ -1,5 +1,6 @@
 package com.wardencloud.wardenstashedserver.entities;
 
+import java.util.Date;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -12,9 +13,13 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Table(name = "StudyCards")
@@ -31,6 +36,11 @@ public class StudyCard implements Card {
 
     @Column(columnDefinition = "CHAR(100)")
     private String school;
+
+    @Column(name = "modified_timestamp")
+    @Temporal(TemporalType.TIMESTAMP)
+    @UpdateTimestamp
+    private Date modifiedTimestamp;
 
     @OrderBy("id asc")
     @OneToMany(cascade = { CascadeType.ALL })

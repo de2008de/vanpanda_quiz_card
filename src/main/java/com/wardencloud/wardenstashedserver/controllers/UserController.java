@@ -6,7 +6,6 @@ import com.wardencloud.wardenstashedserver.jwt.annotations.PassToken;
 import com.wardencloud.wardenstashedserver.services.TokenService;
 import com.wardencloud.wardenstashedserver.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,9 +27,7 @@ public class UserController {
     private final String USER_ID_KEY = "userId";
     private final String USER_NON_EXIST_MESSAGE = "user does not exist";
     private final String PASSWORD_INCORRECT_MESSAGE = "incorrect password";
-    private final String ALREADY_USED_ERROR_MESSAGE = "is being used already";
     private final String FIELD_IS_REQUIRED_ERROR_MESSAGE = "is required";
-    private final String FAILED_ADD_USER_MESSAGE = "failed to add new user";
 
     @PostMapping(value = "/login")
     @PassToken
@@ -71,44 +68,21 @@ public class UserController {
     @PostMapping(value = "/signup")
     @PassToken
     public ResponseEntity<Object> signUp(@RequestBody Map<String, String> payload) {
-        Map<String, String> errorMessages = new HashMap<>();
-        JSONObject jsonObject = new JSONObject();
-
-        String[] requiredFields = new String[] {"username", "email", "password"};
-        for(int i = 0; i < requiredFields.length; i++) {
-            if (payload.get(requiredFields[i]) == null || payload.get(requiredFields[i]).length() == 0) {
-                errorMessages.put(requiredFields[i], FIELD_IS_REQUIRED_ERROR_MESSAGE);
-            }
-        }
-        if (!errorMessages.isEmpty()) {
-            jsonObject.put(ERROR_MESSAGES_KEY, errorMessages);
-            return ResponseEntity.badRequest().body(jsonObject);
-        }
-
+        JSONObject result = new JSONObject();
         String username = payload.get("username");
         String email = payload.get("email");
         String password = payload.get("password");
-        if (userService.findUserByUsername(username) != null) {
-            errorMessages.put("username", ALREADY_USED_ERROR_MESSAGE);
-        }
-        if (userService.findUserByEmail(email) != null) {
-            errorMessages.put("email", ALREADY_USED_ERROR_MESSAGE);
-        }
-        if (!errorMessages.isEmpty()) {
-            jsonObject.put(ERROR_MESSAGES_KEY, errorMessages);
-            return ResponseEntity.badRequest().body(jsonObject);
-        }
-        int userId = userService.addUser(username, email, password);
-        if (userId == -1) {
-            errorMessages.put("general", FAILED_ADD_USER_MESSAGE);
-            jsonObject.put(ERROR_MESSAGES_KEY, errorMessages);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(jsonObject);
+        JSONObject addUserResult = userService.addUser(username, email, password);
+        if (!addUserResult.getBooleanValue("success")) {
+            result.put("errorMessages", addUserResult.getJSONObject("errorMessages"));
+            return ResponseEntity.badRequest().body(result);
         } else {
+            int userId = addUserResult.getIntValue("userId");
             User user = userService.findUserById(userId);
             String token = tokenService.getToken(user);
-            jsonObject.put(TOKEN_KEY, token);
-            jsonObject.put(USER_ID_KEY, userId);
-            return ResponseEntity.ok().body(jsonObject);
+            result.put(TOKEN_KEY, token);
+            result.put(USER_ID_KEY, userId);
+            return ResponseEntity.ok().body(result);
         }
     }
 

@@ -1,4 +1,4 @@
-version: "3"
+version: "3.2"
 services:
   mysql1:
     image: mysql
@@ -8,15 +8,76 @@ services:
       - 3306:3306
     environment:
       MYSQL_DATABASE: vanpanda
-      MYSQL_USER: root
-      MYSQL_PASSWORD: root
       MYSQL_ROOT_PASSWORD: root
+      TZ: "America/Los_Angeles"
+    networks:
+      - backend
+
+  mongodb1:
+    image: mongo
+    expose:
+      - 27017
+    ports:
+      - 27017:27017
+    # environment:
+    #   MONGO_INITDB_ROOT_USERNAME: root
+    #   MONGO_INITDB_ROOT_PASSWORD: root
+    networks:
+      - backend
 
   app:
     build: .
     ports:
       - 8080:8080
-    links:
-      - mysql1
+    networks:
+      - backend
+    environment:
+      TZ: "America/Los_Angeles"
     depends_on:
       - mysql1
+      - es
+
+  es:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.4.2
+    expose:
+      - 9300
+      - 9200
+    ports:
+        - 9300:9300
+        - 9200:9200
+    environment:
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - http.cors.enabled=true
+      - http.cors.allow-origin=*
+      - discovery.type=single-node
+      - TZ="America/Los_Angeles"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    networks:
+      - backend
+
+  logstash1:
+    build:
+      context: docker/logstash/
+    volumes:
+      - type: bind
+        source: ./docker/logstash/pipeline
+        target: /usr/share/logstash/pipeline
+        read_only: true
+    ports:
+      - "5000:5000"
+      - "9600:9600"
+    environment:
+      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+      TZ: "America/Los_Angeles"
+    networks:
+      - backend
+    depends_on:
+      - es
+
+networks:
+  backend:
