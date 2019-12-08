@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @CrossOrigin
@@ -17,51 +16,34 @@ import java.util.Map;
 @RequestMapping(value = "/api/v1/user")
 public class UserController {
     @Autowired
-    TokenService tokenService;
+    private TokenService tokenService;
 
     @Autowired
-    UserService userService;
+    private UserService userService;
 
     private final String TOKEN_KEY = "token";
     private final String ERROR_MESSAGES_KEY = "errorMessages";
+    private final String SUCCESS_STATUS_KEY = "success";
     private final String USER_ID_KEY = "userId";
     private final String USER_NON_EXIST_MESSAGE = "user does not exist";
-    private final String PASSWORD_INCORRECT_MESSAGE = "incorrect password";
-    private final String FIELD_IS_REQUIRED_ERROR_MESSAGE = "is required";
 
     @PostMapping(value = "/login")
     @PassToken
     public ResponseEntity<Object> login(@RequestBody Map<String, String> payload) {
         String email = payload.get("email");
         String password = payload.get("password");
-        JSONObject jsonObject = new JSONObject();
-        Map<String, String> errorMessages = new HashMap<>();
-
-        if (email == null || email.length() == 0) {
-            errorMessages.put("email", FIELD_IS_REQUIRED_ERROR_MESSAGE);
-        }
-        if (password == null || password.length() == 0) {
-            errorMessages.put("password", FIELD_IS_REQUIRED_ERROR_MESSAGE);
-        }
-        if (!errorMessages.isEmpty()) {
-            jsonObject.put(ERROR_MESSAGES_KEY, errorMessages);
-            return ResponseEntity.badRequest().body(jsonObject);
-        }
-
-        User userBase = userService.findUserByEmail(email);
-        if (userBase == null) {
-            errorMessages.put("general", USER_NON_EXIST_MESSAGE);
-        }
-        if (userBase != null && !userBase.getPassword().equals(password)) {
-            errorMessages.put("general", PASSWORD_INCORRECT_MESSAGE);
-        }
-        if (!errorMessages.isEmpty()) {
-            jsonObject.put(ERROR_MESSAGES_KEY, errorMessages);
-            return ResponseEntity.badRequest().body(jsonObject);
+        JSONObject result = new JSONObject();
+        JSONObject loginResult = userService.login(email, password);
+        if (!loginResult.getBooleanValue("success")) {
+            JSONObject errorMessages = loginResult.getJSONObject("errorMessages");
+            result.put(SUCCESS_STATUS_KEY, false);
+            result.put(ERROR_MESSAGES_KEY, errorMessages);
+            return ResponseEntity.badRequest().body(result);
         } else {
-            String token = tokenService.getToken(userBase);
-            jsonObject.put(TOKEN_KEY, token);
-            return ResponseEntity.ok().body(jsonObject);
+            String token = loginResult.getString("token");
+            result.put(TOKEN_KEY, token);
+            result.put(SUCCESS_STATUS_KEY, true);
+            return ResponseEntity.ok().body(result);
         }
     }
 

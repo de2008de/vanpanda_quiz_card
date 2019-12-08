@@ -8,9 +8,6 @@ import java.util.Set;
 @Entity
 @Table(name = "users")
 public class User {
-    @Transient
-    final private int DEFAULT_NEXT_LEVEL_EXP = 10;
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -24,16 +21,8 @@ public class User {
     @JsonIgnore
     private String password;
 
-    @Column(name = "level", columnDefinition = "integer default 1")
-    private int level;
-
-    @Column(name = "current_exp", columnDefinition = "integer default 0")
-    private int currentExp;
-
-    @Column(name = "next_level_exp", columnDefinition = "integer default " + DEFAULT_NEXT_LEVEL_EXP)
-    private int nextLevelExp;
-
-    private String verifiedIdentity;
+    @JsonIgnore
+    private String salt;
 
     @OrderBy("id desc")
     @OneToMany(cascade = {CascadeType.ALL})
@@ -74,6 +63,14 @@ public class User {
         this.password = password;
     }
 
+    public String getSalt() {
+        return salt;
+    }
+
+    public void setSalt(String salt) {
+        this.salt = salt;
+    }
+
     public Set<Bookmark> getBookmarks() {
         return bookmarks;
     }
@@ -102,46 +99,5 @@ public class User {
 
     public void addCredit(int credit) {
         this.credit += credit;
-    }
-
-    public int getLevel() {
-        return level;
-    }
-
-    public void setLevel(int level) {
-        this.level = level;
-    }
-
-    public String getVerifiedIdentity() {
-        return verifiedIdentity;
-    }
-
-    public void setVerifiedIdentity(String verifiedIdentity) {
-        this.verifiedIdentity = verifiedIdentity;
-    }
-
-    public int getCurrentExp() {
-        return currentExp;
-    }
-
-    public void setCurrentExp(int currentExp) {
-        this.currentExp = currentExp;
-    }
-
-    public int getNextLevelExp() {
-        return nextLevelExp;
-    }
-
-    public void setNextLevelExp(int nextLevelExp) {
-        this.nextLevelExp = nextLevelExp;
-    }
-
-    public void addExp(int exp) {
-        this.currentExp = this.currentExp + exp;
-        if (this.currentExp >= this.nextLevelExp) {
-            this.level = this.level + 1;
-            this.currentExp = this.currentExp - this.nextLevelExp;
-            this.nextLevelExp = this.level * 10;
-        }
     }
 }
