@@ -202,6 +202,79 @@ public class UserService {
         return userProfile;
     }
 
+    public JSONObject changeUserEmail(int userId, String email) {
+        JSONObject result = new JSONObject();
+        JSONObject errorMessages = new JSONObject();
+        String trimEmail = email.trim();
+        User user = findUserById(userId);
+        if (user == null) {
+            errorMessages.put("general", PASSWORD_INCORRECT_MESSAGE);
+            result.put(ERROR_MESSAGES_KEY, errorMessages);
+            result.put("success", false);
+            return result;
+        }
+
+        User existingUser = userRepository.findByUserEmail(trimEmail);
+        if (existingUser != null) {
+            errorMessages.put("email", "is already being used");
+            result.put(ERROR_MESSAGES_KEY, errorMessages);
+            result.put("success", false);
+            return result;
+        }
+
+        if (trimEmail.length() == 0) {
+            errorMessages.put("email", "is required");
+        } else if (trimEmail.length() > EMAIL_MAX_LENGTH) {
+            errorMessages.put("email", "is too long");
+        } else if (!isEmailFormatValid(trimEmail)) {
+            errorMessages.put("email", "format is incorrect");
+        }
+
+        if (!errorMessages.isEmpty()) {
+            result.put(ERROR_MESSAGES_KEY, errorMessages);
+            result.put("success", false);
+            return result;
+        }
+
+        userRepository.changeUserEmail(userId, trimEmail);
+        result.put("success", true);
+        return result;
+    }
+
+    public JSONObject changeUserPassword(int userId, String currentPassword, String newPassword) {
+        JSONObject result = new JSONObject();
+        JSONObject errorMessages = new JSONObject();
+        User user = findUserById(userId);
+        if (user == null) {
+            errorMessages.put("general", PASSWORD_INCORRECT_MESSAGE);
+            result.put(ERROR_MESSAGES_KEY, errorMessages);
+            result.put("success", false);
+            return result;
+        }
+
+        String salt = user.getSalt();
+        String userCurrentPassword = user.getPassword();
+        String encryptedCurrentPassword = encryptionService.encryptPassword(currentPassword, salt);
+        if (!encryptedCurrentPassword.equals(userCurrentPassword)) {
+            errorMessages.put("currentPassword", "is incorrect");
+        } else if (newPassword.length() == 0) {
+            errorMessages.put("newPassword", "is required");
+        } else if (newPassword.length() < PASSWORD_MIN_LENGTH || newPassword.length() > PASSWORD_MAX_LENGTH) {
+            errorMessages.put("newPassword", "must between " + PASSWORD_MIN_LENGTH + " and " + PASSWORD_MAX_LENGTH);
+        }
+
+        if (!errorMessages.isEmpty()) {
+            result.put(ERROR_MESSAGES_KEY, errorMessages);
+            result.put("success", false);
+            return result;
+        }
+        
+        String encryptedNewPassword = encryptionService.encryptPassword(newPassword, salt);
+        userRepository.changeUserPassword(userId, encryptedNewPassword);
+        result.put("success", true);
+        return result;
+    }
+
     private JSONObject validateSignUpInput(String username, String email, String password) {
         JSONObject result = new JSONObject();
         JSONObject errorMessages = new JSONObject();
@@ -218,13 +291,11 @@ public class UserService {
         }
         
         String trimEmail = email.trim();
-        String emailPattern = "^[a-zA-Z0-9_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$";
-        boolean isEmailMatch = Pattern.matches(emailPattern, trimEmail);
         if (trimEmail.length() == 0) {
             errorMessages.put("email", "is required");
         } else if (trimEmail.length() > EMAIL_MAX_LENGTH) {
             errorMessages.put("email", "is too long");
-        } else if (!isEmailMatch) {
+        } else if (!isEmailFormatValid(trimEmail)) {
             errorMessages.put("email", "format is incorrect");
         }
 
@@ -242,5 +313,10 @@ public class UserService {
         }
 
         return result;
+    }
+
+    private boolean isEmailFormatValid(String email) {
+        String emailPattern = "^[a-zA-Z0-9_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$";
+        return Pattern.matches(emailPattern, email);
     }
 }

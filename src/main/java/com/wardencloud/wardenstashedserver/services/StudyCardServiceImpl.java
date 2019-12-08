@@ -10,6 +10,7 @@ import java.util.Set;
 import com.wardencloud.wardenstashedserver.entities.ConceptCard;
 import com.wardencloud.wardenstashedserver.entities.StudyCard;
 import com.wardencloud.wardenstashedserver.entities.User;
+import com.wardencloud.wardenstashedserver.es.services.EsStudyCardService;
 import com.wardencloud.wardenstashedserver.mongodb.entities.MongoUser;
 import com.wardencloud.wardenstashedserver.repositories.StudyCardPagedJpaRepository;
 import com.wardencloud.wardenstashedserver.repositories.StudyCardRepository;
@@ -40,6 +41,9 @@ public class StudyCardServiceImpl implements StudyCardService {
 
     @Autowired
     private MongoTemplate mongoTemplate;
+
+    @Autowired
+    private EsStudyCardService esStudyCardService;
 
     private int pageSize = 10;
     private Sort sortRule = Sort.by(Sort.Order.desc("id"));
@@ -215,6 +219,7 @@ public class StudyCardServiceImpl implements StudyCardService {
             return;
         } else {
             studyCardRepository.deleteStudyCardById(studyCardId);
+            esStudyCardService.deleteStudyCardById(studyCardId);
         }
     }
 }

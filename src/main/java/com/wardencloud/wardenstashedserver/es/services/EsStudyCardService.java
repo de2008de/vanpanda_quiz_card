@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import io.searchbox.client.JestClient;
 import io.searchbox.client.JestResult;
+import io.searchbox.core.Delete;
 import io.searchbox.core.Search;
 
 @Service
@@ -44,6 +45,19 @@ public class EsStudyCardService {
         } catch (IOException e) {
             e.printStackTrace();
             return null;
+        }
+    }
+
+    public void deleteStudyCardById(int id) {
+        Delete delete = new Delete
+                        .Builder(Integer.toString(id))
+                        .index("cards")
+                        .type("card")
+                        .build();
+        try {
+            jestClient.execute(delete);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
