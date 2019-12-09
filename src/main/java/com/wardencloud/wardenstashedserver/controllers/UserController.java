@@ -98,21 +98,21 @@ public class UserController {
         return ResponseEntity.ok().body(jsonObject);
     }
 
-    @PostMapping(value = "/email")
-    public ResponseEntity<Object> changeUserEmail(@RequestHeader("token") String token, @RequestBody JSONObject payload) {
-        JSONObject result = new JSONObject();
-        int userId = tokenService.getUserIdFromToken(token);
-        String email = payload.getString("email");
-        JSONObject changeEmailResult = userService.changeUserEmail(userId, email);
-        if (!changeEmailResult.getBooleanValue("success")) {
-            JSONObject errorMessages = changeEmailResult.getJSONObject("errorMessages");
-            result.put(ERROR_MESSAGES_KEY, errorMessages);
-            result.put("success", false);
-            return ResponseEntity.badRequest().body(result);
-        }
-        result.put("success", true);
-        return ResponseEntity.ok().body(result);
-    }
+    // @PostMapping(value = "/email")
+    // public ResponseEntity<Object> changeUserEmail(@RequestHeader("token") String token, @RequestBody JSONObject payload) {
+    //     JSONObject result = new JSONObject();
+    //     int userId = tokenService.getUserIdFromToken(token);
+    //     String email = payload.getString("email");
+    //     JSONObject changeEmailResult = userService.changeUserEmail(userId, email);
+    //     if (!changeEmailResult.getBooleanValue("success")) {
+    //         JSONObject errorMessages = changeEmailResult.getJSONObject("errorMessages");
+    //         result.put(ERROR_MESSAGES_KEY, errorMessages);
+    //         result.put("success", false);
+    //         return ResponseEntity.badRequest().body(result);
+    //     }
+    //     result.put("success", true);
+    //     return ResponseEntity.ok().body(result);
+    // }
 
     @PostMapping(value = "/password")
     public ResponseEntity<Object> changeUserPassword(@RequestHeader("token") String token, @RequestBody JSONObject payload) {
