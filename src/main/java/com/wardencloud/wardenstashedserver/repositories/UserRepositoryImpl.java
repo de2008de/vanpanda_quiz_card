@@ -44,12 +44,13 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public User addUser(String username, String email, String password) {
+    public User addUser(String username, String email, String password, String salt) {
         try {
-            int numUpdated = entityManager.createNativeQuery("INSERT INTO users (username, email, password) VALUES (:username, :email, :password)", User.class)
+            int numUpdated = entityManager.createNativeQuery("INSERT INTO users (username, email, password, salt) VALUES (:username, :email, :password, :salt)", User.class)
                     .setParameter("username", username)
                     .setParameter("email", email)
                     .setParameter("password", password)
+                    .setParameter("salt", salt)
                     .executeUpdate();
             if (numUpdated == 1) {
                 User user = findByUserEmail(email);
@@ -60,6 +61,7 @@ public class UserRepositoryImpl implements UserRepository {
                 throw new RuntimeException(ADD_USER_ERROR_MESSAGE);
             }
         } catch (RuntimeException e) {
+            e.printStackTrace();
             return null;
         }
     }
@@ -72,5 +74,23 @@ public class UserRepositoryImpl implements UserRepository {
         entityManager.flush();
         entityManager.refresh(user);
         return user;
+    }
+
+    @Override
+    public void changeUserEmail(int userId, String email) {
+        User user = findById(userId);
+        entityManager.persist(user);
+        user.setEmail(email);
+        entityManager.flush();
+        entityManager.refresh(user);
+    }
+
+    @Override
+    public void changeUserPassword(int userId, String password) {
+        User user = findById(userId);
+        entityManager.persist(user);
+        user.setPassword(password);
+        entityManager.flush();
+        entityManager.refresh(user);
     }
 }

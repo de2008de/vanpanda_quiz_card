@@ -6,6 +6,8 @@ public interface UserRepository {
     User findById(int id);
     User findByUsername(String username);
     User findByUserEmail(String email);
-    User addUser(String username, String email, String password);
+    User addUser(String username, String email, String password, String salt);
     User addCreditForUserById(int id, int credit);
+    void changeUserEmail(int userId, String email);
+    void changeUserPassword(int userId, String password);
 }

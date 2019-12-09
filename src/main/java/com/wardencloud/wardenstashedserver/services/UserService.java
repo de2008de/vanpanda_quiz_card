@@ -27,11 +27,21 @@ public class UserService {
     @Autowired
     private MongoTemplate mongoTemplate;
 
+    @Autowired
+    private EncryptionService encryptionService;
+
+    @Autowired
+    private TokenService tokenService;
+
     private final int EMAIL_MAX_LENGTH = 100;
     private final int USERNAME_MIN_LENGTH = 4;
     private final int USERNAME_MAX_LENGTH = 16;
     private final int PASSWORD_MIN_LENGTH = 6;
     private final int PASSWORD_MAX_LENGTH = 16;
+
+    private final String FIELD_IS_REQUIRED_ERROR_MESSAGE = "is required";
+    private final String ERROR_MESSAGES_KEY = "errorMessages";
+    private final String PASSWORD_INCORRECT_MESSAGE = "incorrect password";
 
     public User findUserById(int id) {
         return userRepository.findById(id);
@@ -46,7 +56,6 @@ public class UserService {
     }
 
     public JSONObject addUser(String username, String email, String password) {
-        // TODO: password should be encrypted before inserting it into DB
         JSONObject result = new JSONObject();
         JSONObject errorMessages = new JSONObject();
         String trimUsername = username.trim();
@@ -85,8 +94,9 @@ public class UserService {
             result.put("errorMessages", errorMessages);
             return result;
         }
-
-        User user = userRepository.addUser(trimUsername, trimEmail, password);
+        String salt = encryptionService.getSalt();
+        String encryptedPassword = encryptionService.encryptPassword(password, salt);
+        User user = userRepository.addUser(trimUsername, trimEmail, encryptedPassword, salt);
         MongoUser mongoUser = new MongoUser();
         mongoUser.setId(user.getId());
         MongoUser insertedMongoUser = mongoTemplate.insert(mongoUser);
@@ -100,6 +110,46 @@ public class UserService {
             result.put("userId", user.getId());
             return result;
         }
+    }
+
+    public JSONObject login(String email, String password) {
+        JSONObject result = new JSONObject();
+        JSONObject errorMessages = new JSONObject();
+        if (email == null || email.length() == 0) {
+            errorMessages.put("email", FIELD_IS_REQUIRED_ERROR_MESSAGE);
+        }
+        if (password == null || password.length() == 0) {
+            errorMessages.put("password", FIELD_IS_REQUIRED_ERROR_MESSAGE);
+        }
+        if (!errorMessages.isEmpty()) {
+            result.put("success", false);
+            result.put(ERROR_MESSAGES_KEY, errorMessages);
+        }
+
+        User user = findUserByEmail(email);
+        if (user == null) {
+            result.put("success", false);
+            errorMessages.put("general", PASSWORD_INCORRECT_MESSAGE);
+        } else {
+            String salt = user.getSalt();
+            String encryptedPassword = encryptionService.encryptPassword(password, salt);
+            String userPassword = user.getPassword();
+            if (!userPassword.equals(encryptedPassword)) {
+                result.put("success", false);
+                errorMessages.put("general", PASSWORD_INCORRECT_MESSAGE);
+            }
+        }
+
+        if (!errorMessages.isEmpty()) {
+            result.put("success", false);
+            result.put(ERROR_MESSAGES_KEY, errorMessages);
+        } else {
+            String token = tokenService.getToken(user);
+            result.put("token", token);
+            result.put("success", true);
+        }
+
+        return result;
     }
 
     public MongoUser addMongoUser(int userId) {
@@ -116,9 +166,9 @@ public class UserService {
     public Map<String, Object> getUserProfileById(int id, Boolean isPrivate) {
         String[] fields = null;
         if (isPrivate == true) {
-            fields = new String[] { "id", "username", "email", "level", "currentExp", "nextLevelExp", "credit", "verifiedIdentity" };
+            fields = new String[] { "id", "username", "email", "credit" };
         } else {
-            fields = new String[] { "id", "username", "description", "level", "verifiedIdentity" };
+            fields = new String[] { "id", "username" };
         }
         
         HashMap<String, Boolean> fieldsMap = new HashMap<>();
@@ -152,6 +202,79 @@ public class UserService {
         return userProfile;
     }
 
+    public JSONObject changeUserEmail(int userId, String email) {
+        JSONObject result = new JSONObject();
+        JSONObject errorMessages = new JSONObject();
+        String trimEmail = email.trim();
+        User user = findUserById(userId);
+        if (user == null) {
+            errorMessages.put("general", PASSWORD_INCORRECT_MESSAGE);
+            result.put(ERROR_MESSAGES_KEY, errorMessages);
+            result.put("success", false);
+            return result;
+        }
+
+        User existingUser = userRepository.findByUserEmail(trimEmail);
+        if (existingUser != null) {
+            errorMessages.put("email", "is already being used");
+            result.put(ERROR_MESSAGES_KEY, errorMessages);
+            result.put("success", false);
+            return result;
+        }
+
+        if (trimEmail.length() == 0) {
+            errorMessages.put("email", "is required");
+        } else if (trimEmail.length() > EMAIL_MAX_LENGTH) {
+            errorMessages.put("email", "is too long");
+        } else if (!isEmailFormatValid(trimEmail)) {
+            errorMessages.put("email", "format is incorrect");
+        }
+
+        if (!errorMessages.isEmpty()) {
+            result.put(ERROR_MESSAGES_KEY, errorMessages);
+            result.put("success", false);
+            return result;
+        }
+
+        userRepository.changeUserEmail(userId, trimEmail);
+        result.put("success", true);
+        return result;
+    }
+
+    public JSONObject changeUserPassword(int userId, String currentPassword, String newPassword) {
+        JSONObject result = new JSONObject();
+        JSONObject errorMessages = new JSONObject();
+        User user = findUserById(userId);
+        if (user == null) {
+            errorMessages.put("general", PASSWORD_INCORRECT_MESSAGE);
+            result.put(ERROR_MESSAGES_KEY, errorMessages);
+            result.put("success", false);
+            return result;
+        }
+
+        String salt = user.getSalt();
+        String userCurrentPassword = user.getPassword();
+        String encryptedCurrentPassword = encryptionService.encryptPassword(currentPassword, salt);
+        if (!encryptedCurrentPassword.equals(userCurrentPassword)) {
+            errorMessages.put("currentPassword", "is incorrect");
+        } else if (newPassword.length() == 0) {
+            errorMessages.put("newPassword", "is required");
+        } else if (newPassword.length() < PASSWORD_MIN_LENGTH || newPassword.length() > PASSWORD_MAX_LENGTH) {
+            errorMessages.put("newPassword", "must between " + PASSWORD_MIN_LENGTH + " and " + PASSWORD_MAX_LENGTH);
+        }
+
+        if (!errorMessages.isEmpty()) {
+            result.put(ERROR_MESSAGES_KEY, errorMessages);
+            result.put("success", false);
+            return result;
+        }
+        
+        String encryptedNewPassword = encryptionService.encryptPassword(newPassword, salt);
+        userRepository.changeUserPassword(userId, encryptedNewPassword);
+        result.put("success", true);
+        return result;
+    }
+
     private JSONObject validateSignUpInput(String username, String email, String password) {
         JSONObject result = new JSONObject();
         JSONObject errorMessages = new JSONObject();
@@ -168,13 +291,11 @@ public class UserService {
         }
         
         String trimEmail = email.trim();
-        String emailPattern = "^[a-zA-Z0-9_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$";
-        boolean isEmailMatch = Pattern.matches(emailPattern, trimEmail);
         if (trimEmail.length() == 0) {
             errorMessages.put("email", "is required");
         } else if (trimEmail.length() > EMAIL_MAX_LENGTH) {
             errorMessages.put("email", "is too long");
-        } else if (!isEmailMatch) {
+        } else if (!isEmailFormatValid(trimEmail)) {
             errorMessages.put("email", "format is incorrect");
         }
 
@@ -192,5 +313,10 @@ public class UserService {
         }
 
         return result;
+    }
+
+    private boolean isEmailFormatValid(String email) {
+        String emailPattern = "^[a-zA-Z0-9_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$";
+        return Pattern.matches(emailPattern, email);
     }
 }
