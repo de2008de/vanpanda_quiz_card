@@ -33,6 +33,9 @@ public class UserService {
     @Autowired
     private TokenService tokenService;
 
+    @Autowired
+    private EmailService emailService;
+
     private final int EMAIL_MAX_LENGTH = 100;
     private final int USERNAME_MIN_LENGTH = 4;
     private final int USERNAME_MAX_LENGTH = 16;
@@ -106,8 +109,13 @@ public class UserService {
             result.put("errorMessages", errorMessages);
             return result;
         } else {
+            int userId = user.getId();
+            String userEmail = user.getEmail();
             result.put("success", true);
-            result.put("userId", user.getId());
+            result.put("userId", userId);
+            String emailVerifierToken = tokenService.getEmailVerifierToken(userId);
+            emailService.addEmailVerifier(userId, userEmail, emailVerifierToken);
+            emailService.sendVerificationEmail(userId);
             return result;
         }
     }

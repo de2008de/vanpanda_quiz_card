@@ -47,4 +47,11 @@ public class TokenService {
         String userId = audiences.get(0);
         return Integer.parseInt(userId);
     }
+
+    public String getEmailVerifierToken(int userId) {
+        String token = JWT.create()
+                        .withAudience(Integer.toString(userId))
+                        .sign(Algorithm.HMAC256(tokenSecret));
+        return token;
+    }
 }
