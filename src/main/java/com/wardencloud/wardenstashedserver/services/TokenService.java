@@ -20,14 +20,13 @@ public class TokenService {
     private String tokenSecret; // Change this secret in application.properties when on production
 
     private long TOKEN_VALID_DAYS = 7;
-    private Instant tokenValidInstant = ZonedDateTime.now().plusDays(TOKEN_VALID_DAYS).toInstant();
-    private Date expireDate = Date.from(tokenValidInstant);
 
     public String getToken(User user) {
         String token = "";
+        Date expiredDate = getTokenExpiredDate();
         token = JWT.create()
                 .withAudience(Integer.toString(user.getId()))
-                .withExpiresAt(expireDate)
+                .withExpiresAt(expiredDate)
                 .sign(Algorithm.HMAC256(tokenSecret));
         return token;
     }
@@ -46,5 +45,11 @@ public class TokenService {
         List<String> audiences = decodedJWT.getAudience();
         String userId = audiences.get(0);
         return Integer.parseInt(userId);
+    }
+
+    private Date getTokenExpiredDate() {
+        Instant tokenValidInstant = ZonedDateTime.now().plusDays(TOKEN_VALID_DAYS).toInstant();
+        Date expiredDate = Date.from(tokenValidInstant);
+        return expiredDate;
     }
 }
