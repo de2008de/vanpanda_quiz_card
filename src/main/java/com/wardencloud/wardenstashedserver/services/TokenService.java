@@ -47,6 +47,14 @@ public class TokenService {
         return Integer.parseInt(userId);
     }
 
+
+    public String getEmailVerifierToken(int userId) {
+        String token = JWT.create()
+                        .withAudience(Integer.toString(userId))
+                        .sign(Algorithm.HMAC256(tokenSecret));
+        return token;
+    }
+  
     private Date getTokenExpiredDate() {
         Instant tokenValidInstant = ZonedDateTime.now().plusDays(TOKEN_VALID_DAYS).toInstant();
         Date expiredDate = Date.from(tokenValidInstant);

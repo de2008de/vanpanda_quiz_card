@@ -18,6 +18,9 @@ public class User {
     @Column(name = "email", unique = true, nullable = false, length = 100)
     private String email;
 
+    @Column(name = "is_email_verified", columnDefinition = "boolean default false")
+    private boolean isEmailVerified;
+
     @JsonIgnore
     private String password;
 
@@ -99,5 +102,13 @@ public class User {
 
     public void addCredit(int credit) {
         this.credit += credit;
+    }
+
+    public boolean isEmailVerified() {
+        return isEmailVerified;
+    }
+
+    public void setEmailVerified(boolean isEmailVerified) {
+        this.isEmailVerified = isEmailVerified;
     }
 }

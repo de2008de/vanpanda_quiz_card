@@ -1,8 +1,10 @@
 package com.wardencloud.wardenstashedserver.controllers;
 
 import com.alibaba.fastjson.JSONObject;
+import com.wardencloud.wardenstashedserver.entities.EmailVerifier;
 import com.wardencloud.wardenstashedserver.entities.User;
 import com.wardencloud.wardenstashedserver.jwt.annotations.PassToken;
+import com.wardencloud.wardenstashedserver.services.EmailService;
 import com.wardencloud.wardenstashedserver.services.TokenService;
 import com.wardencloud.wardenstashedserver.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
 
 @CrossOrigin
 @RestController
@@ -20,6 +24,9 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private EmailService emailService;
 
     private final String TOKEN_KEY = "token";
     private final String ERROR_MESSAGES_KEY = "errorMessages";
@@ -129,5 +136,19 @@ public class UserController {
         }
         result.put("success", true);
         return ResponseEntity.ok().body(result);
+    }
+
+    @GetMapping(value = "/email_verification")
+    @PassToken
+    public ResponseEntity<Object> verifyEmail(HttpServletRequest request) {
+        String token = request.getParameter("token");
+        EmailVerifier emailVerifier = emailService.getEmailVerifierByToken(token);
+        if (emailVerifier != null) {
+            int userId = emailVerifier.getUserId();
+            emailService.setUserEmailVerified(userId);
+            return ResponseEntity.ok().body("Email verified");
+        } else {
+            return ResponseEntity.badRequest().build();
+        }
     }
 }
