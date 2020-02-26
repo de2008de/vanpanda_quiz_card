@@ -10,4 +10,5 @@ public interface UserRepository {
     User addCreditForUserById(int id, int credit);
     void changeUserEmail(int userId, String email);
     void changeUserPassword(int userId, String password);
+    void setUserEmailVerified(int userId);
 }
