@@ -1,3 +1,5 @@
+![language](https://img.shields.io/badge/language-Java-brightgreen) ![author](https://img.shields.io/badge/author-David%20Chou-blue) ![version](https://img.shields.io/badge/version-beta-orange)
+
 ![logo](logo.png)
 
 Vanpanda quiz card app is a web app that allows users to create their quiz cards and review the quiz cards.
