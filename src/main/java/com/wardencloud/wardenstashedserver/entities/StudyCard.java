@@ -52,8 +52,12 @@ public class StudyCard implements Card {
 
     @Transient
     private int userId;
+
     @Transient
     private String username;
+
+    @Transient
+    private int userType;
 
     public int getId() {
         return id;
@@ -92,8 +96,6 @@ public class StudyCard implements Card {
     }
 
     public void setUser(User user) {
-        this.setUserId(user.getId());
-        this.setUsername(user.getUsername());
         this.user = user;
     }
 
@@ -119,5 +121,13 @@ public class StudyCard implements Card {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public int getUserType() {
+        return user.getType();
+    }
+
+    public void setUserType(int userType) {
+        this.userType = userType;
     }
 }
