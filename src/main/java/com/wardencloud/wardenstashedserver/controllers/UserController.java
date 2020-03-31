@@ -58,10 +58,9 @@ public class UserController {
     @PassToken
     public ResponseEntity<Object> signUp(@RequestBody Map<String, String> payload) {
         JSONObject result = new JSONObject();
-        String username = payload.get("username");
         String email = payload.get("email");
         String password = payload.get("password");
-        JSONObject addUserResult = userService.addUser(username, email, password);
+        JSONObject addUserResult = userService.addUser(email, password);
         if (!addUserResult.getBooleanValue("success")) {
             result.put("errorMessages", addUserResult.getJSONObject("errorMessages"));
             return ResponseEntity.badRequest().body(result);

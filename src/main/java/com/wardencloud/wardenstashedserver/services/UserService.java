@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -56,6 +57,11 @@ public class UserService {
 
     public User findUserByEmail(String email) {
         return userRepository.findByUserEmail(email);
+    }
+
+    public JSONObject addUser(String email, String password) {
+        String username = getRandomUsername();
+        return addUser(username, email, password);
     }
 
     public JSONObject addUser(String username, String email, String password) {
@@ -327,4 +333,22 @@ public class UserService {
         String emailPattern = "^[a-zA-Z0-9_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$";
         return Pattern.matches(emailPattern, email);
     }
+
+    private String getRandomUsername() {
+        int leftLimit = 97; // letter 'a'
+        int rightLimit = 122; // letter 'z'
+        int targetStringLength = 5;
+        Random random = new Random();
+        StringBuilder sb = new StringBuilder(targetStringLength);
+        for (int i = 0; i < targetStringLength; i++) {
+            int randomLimitedInt = leftLimit + (int) 
+              (random.nextFloat() * (rightLimit - leftLimit + 1));
+            sb.append((char) randomLimitedInt);
+        }
+        for (int i = 0; i < targetStringLength; i++) {
+            int randomNum = random.nextInt(9);
+            sb.append(randomNum);
+        }
+        return sb.toString();
+    };
 }
