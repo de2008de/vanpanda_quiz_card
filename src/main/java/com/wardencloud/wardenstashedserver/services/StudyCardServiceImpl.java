@@ -1,5 +1,6 @@
 package com.wardencloud.wardenstashedserver.services;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -10,6 +11,7 @@ import java.util.Set;
 import com.wardencloud.wardenstashedserver.entities.ConceptCard;
 import com.wardencloud.wardenstashedserver.entities.StudyCard;
 import com.wardencloud.wardenstashedserver.entities.User;
+import com.wardencloud.wardenstashedserver.es.entities.EsStudyCard;
 import com.wardencloud.wardenstashedserver.es.services.EsStudyCardService;
 import com.wardencloud.wardenstashedserver.mongodb.entities.MongoUser;
 import com.wardencloud.wardenstashedserver.repositories.StudyCardPagedJpaRepository;
@@ -225,5 +227,16 @@ public class StudyCardServiceImpl implements StudyCardService {
             studyCardRepository.deleteStudyCardById(studyCardId);
             esStudyCardService.deleteStudyCardById(studyCardId);
         }
+    }
+
+    public List<StudyCard> convertEsStudyCardsToStudyCards(List<EsStudyCard> esCards) {
+        Iterator<EsStudyCard> iterator = esCards.iterator();
+        List<StudyCard> sdCards = new ArrayList<>();
+        while (iterator.hasNext()) {
+            EsStudyCard esCard = iterator.next();
+            StudyCard sdCard = getStudyCardById(esCard.getId());
+            sdCards.add(sdCard);
+        }
+        return sdCards;
     }
 }
