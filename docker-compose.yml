@@ -4,8 +4,8 @@ services:
     image: mysql
     expose: 
       - 3306
-    ports: 
-      - 3306:3306
+    # ports: 
+    #   - 3306:3306
     environment:
       MYSQL_DATABASE: vanpanda
       MYSQL_ROOT_PASSWORD: root
@@ -19,8 +19,8 @@ services:
       - 27017
     # environment:
       # TZ: America/Vancouver
-    ports:
-      - 27017:27017
+    # ports:
+    #   - 27017:27017
     # environment:
     #   MONGO_INITDB_ROOT_USERNAME: root
     #   MONGO_INITDB_ROOT_PASSWORD: M2WgfWXi7j7eahThtfuXb19Ju33WbI
@@ -44,9 +44,9 @@ services:
     expose:
       - 9300
       - 9200
-    ports:
-        - 9300:9300
-        - 9200:9200
+    # ports:
+    #     - 9300:9300
+    #     - 9200:9200
     environment:
       - cluster.name=docker-cluster
       - bootstrap.memory_lock=true
@@ -70,9 +70,9 @@ services:
         source: ./docker/logstash/pipeline
         target: /usr/share/logstash/pipeline
         read_only: true
-    ports:
-      - "5000:5000"
-      - "9600:9600"
+    # ports:
+    #   - "5000:5000"
+    #   - "9600:9600"
     environment:
       LS_JAVA_OPTS: "-Xmx256m -Xms256m"
       # TZ: America/Vancouver

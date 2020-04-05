@@ -138,6 +138,7 @@ public class StudyCardServiceImpl implements StudyCardService {
         ConceptCard conceptCard = new ConceptCard();
         conceptCard.setTerm((String) map.get("term"));
         conceptCard.setDefinition((String) map.get("definition"));
+        conceptCard.setImg((String) map.get("img"));
         return conceptCard;
     }
 
