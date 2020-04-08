@@ -74,6 +74,29 @@ public class UserController {
         }
     }
 
+    @PutMapping(value = "/username")
+    public ResponseEntity<Object> changeUserName(@RequestHeader("token") String token, @RequestBody JSONObject payload) {
+        JSONObject result = new JSONObject();
+        int userId = tokenService.getUserIdFromToken(token);
+        if (userId == -1) {
+            JSONObject errorMessages = new JSONObject();
+            errorMessages.put(ERROR_MESSAGES_KEY, USER_NON_EXIST_MESSAGE);
+            result.put("errorMessages", errorMessages);
+            result.put("success", false);
+            return ResponseEntity.badRequest().body(result);
+        }
+        String username = payload.getString("username");
+        JSONObject userServiceResult = userService.changeUsername(userId, username);
+        if (!userServiceResult.getBooleanValue("success")) {
+            result.put("errorMessages", userServiceResult.getJSONObject("errorMessages"));
+            result.put("success", false);
+            return ResponseEntity.badRequest().body(result);
+        } else {
+            result.put("success", true);
+            return ResponseEntity.ok().body(result);
+        }
+    }
+
     @GetMapping(value = "/profile")
     public ResponseEntity<Object> getUserProfile(@RequestHeader("token") String token) {
         Boolean isPrivateProfile = true;

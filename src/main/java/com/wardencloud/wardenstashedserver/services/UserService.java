@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
 import com.alibaba.fastjson.JSONObject;
@@ -16,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
+
+import com.wardencloud.wardenstashedserver.helpers.CommonHelper;
 import com.wardencloud.wardenstashedserver.helpers.ReflectionHelper;
 import com.wardencloud.wardenstashedserver.mongodb.entities.MongoUser;
 
@@ -67,9 +70,9 @@ public class UserService {
     public JSONObject addUser(String username, String email, String password) {
         JSONObject result = new JSONObject();
         JSONObject errorMessages = new JSONObject();
-        String trimUsername = username.trim();
+        String sanitizedUsername = sanitizeUsername(username);
         String trimEmail = email.trim();
-        JSONObject validationResult = validateSignUpInput(trimUsername, trimEmail, password);
+        JSONObject validationResult = validateSignUpInput(sanitizedUsername, trimEmail, password);
         boolean isUsernameValid = (boolean) validationResult.get("success");
         if (!isUsernameValid) {
             Set<Map.Entry<String, Object>> validationErrorMessages = validationResult
@@ -96,16 +99,9 @@ public class UserService {
             return result;
         }
 
-        existingUser = findUserByUsername(trimUsername);
-        if (existingUser != null) {
-            result.put("success", false);
-            errorMessages.put("username", "is already being used");
-            result.put("errorMessages", errorMessages);
-            return result;
-        }
         String salt = encryptionService.getSalt();
         String encryptedPassword = encryptionService.encryptPassword(password, salt);
-        User user = userRepository.addUser(trimUsername, trimEmail, encryptedPassword, salt);
+        User user = userRepository.addUser(sanitizedUsername, trimEmail, encryptedPassword, salt);
         MongoUser mongoUser = new MongoUser();
         mongoUser.setId(user.getId());
         MongoUser insertedMongoUser = mongoTemplate.insert(mongoUser);
@@ -289,21 +285,44 @@ public class UserService {
         return result;
     }
 
+    public JSONObject changeUsername(int id, String username) {
+        JSONObject result = new JSONObject();
+        JSONObject errorMessages = new JSONObject();
+        User user = findUserById(id);
+        if (user == null) {
+            errorMessages.put("user", "user not found");
+            result.put("errorMessages", errorMessages);
+            result.put("success", false);
+            return result;
+        }
+        String sanitizedUsername = sanitizeUsername(username);
+        JSONObject usernameValidationResult = validateUsername(sanitizedUsername);
+        if (!usernameValidationResult.getBooleanValue("success")) {
+             CommonHelper ch = new CommonHelper();
+             ch.moveJSONObjectEntries(usernameValidationResult.getJSONObject("errorMessages"), errorMessages);
+             ch = null;
+        }
+        if (!errorMessages.isEmpty()) {
+            result.put("success", false);
+            result.put("errorMessages", errorMessages);
+            return result;
+        }
+        userRepository.changeUsername(id, sanitizedUsername);
+        result.put("success", true);
+        return result;
+    }
+
     private JSONObject validateSignUpInput(String username, String email, String password) {
         JSONObject result = new JSONObject();
         JSONObject errorMessages = new JSONObject();
 
-        String trimUsername = username.trim();
-        String usernamePattern = "^[a-zA-Z0-9]+$";
-        boolean isUsernameMatch = Pattern.matches(usernamePattern, trimUsername);
-        if (trimUsername.length() == 0) {
-            errorMessages.put("username", "is required");
-        } else if (trimUsername.length() < USERNAME_MIN_LENGTH || trimUsername.length() > USERNAME_MAX_LENGTH) {
-            errorMessages.put("username", "must between " + USERNAME_MIN_LENGTH + " and " + USERNAME_MAX_LENGTH);
-        } else if (!isUsernameMatch) {
-            errorMessages.put("username", "alphanimeric only");
+        JSONObject usernameValidationRsult = validateUsername(username);
+        if (!usernameValidationRsult.getBooleanValue("success")) {
+            CommonHelper ch = new CommonHelper();
+            ch.moveJSONObjectEntries(usernameValidationRsult.getJSONObject("errorMessages"), errorMessages);
+            ch = null;
         }
-        
+
         String trimEmail = email.trim();
         if (trimEmail.length() == 0) {
             errorMessages.put("email", "is required");
@@ -351,4 +370,36 @@ public class UserService {
         }
         return sb.toString();
     };
+
+    private String sanitizeUsername(String username) {
+        String sanitizedUsername = username.trim();
+        return sanitizedUsername;
+    }
+
+    private JSONObject validateUsername(String username) {
+        JSONObject result = new JSONObject();
+        JSONObject errorMessages = new JSONObject();
+        String usernamePattern = "^[a-zA-Z0-9]+$";
+        boolean isUsernameMatch = Pattern.matches(usernamePattern, username);
+        if (username.length() == 0) {
+            errorMessages.put("username", "username is required");
+        } else if (username.length() < USERNAME_MIN_LENGTH || username.length() > USERNAME_MAX_LENGTH) {
+            errorMessages.put("username", "username must between " + USERNAME_MIN_LENGTH + " and " + USERNAME_MAX_LENGTH);
+        } else if (!isUsernameMatch) {
+            errorMessages.put("username", "username must be alphanimeric only");
+        } else {
+            User existingUser = findUserByUsername(username);
+            if (existingUser != null) {
+                errorMessages.put("username", "username is already taken");
+            }
+        }
+        if (!errorMessages.isEmpty()) {
+            result.put("success", false);
+            result.put("errorMessages", errorMessages);
+            return result;
+        } else {
+            result.put("success", true);
+            return result;
+        }
+    }
 }
