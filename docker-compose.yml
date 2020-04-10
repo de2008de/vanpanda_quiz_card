@@ -9,7 +9,7 @@ services:
     environment:
       MYSQL_DATABASE: vanpanda
       MYSQL_ROOT_PASSWORD: root
-      TZ: "America/Los_Angeles"
+      # TZ: America/Vancouver
     networks:
       - backend
 
@@ -17,6 +17,8 @@ services:
     image: mongo
     expose:
       - 27017
+    # environment:
+      # TZ: America/Vancouver
     # ports:
     #   - 27017:27017
     # environment:
@@ -31,13 +33,13 @@ services:
       - 8080:8080
     networks:
       - backend
-    environment:
-      TZ: "America/Los_Angeles"
+    # environment:
+      # TZ: America/Vancouver
     depends_on:
       - mysql1
-      - es
+      - elasticsearch
 
-  es:
+  elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.4.2
     expose:
       - 9300
@@ -52,7 +54,7 @@ services:
       - http.cors.enabled=true
       - http.cors.allow-origin=*
       - discovery.type=single-node
-      - TZ="America/Los_Angeles"
+      # - TZ=America/Vancouver
     ulimits:
       memlock:
         soft: -1
@@ -73,11 +75,11 @@ services:
     #   - "9600:9600"
     environment:
       LS_JAVA_OPTS: "-Xmx256m -Xms256m"
-      TZ: "America/Los_Angeles"
+      # TZ: America/Vancouver
     networks:
       - backend
     depends_on:
-      - es
+      - elasticsearch
 
 networks:
   backend:

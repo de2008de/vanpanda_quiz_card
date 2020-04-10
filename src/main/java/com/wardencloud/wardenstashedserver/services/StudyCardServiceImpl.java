@@ -1,5 +1,6 @@
 package com.wardencloud.wardenstashedserver.services;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -10,6 +11,7 @@ import java.util.Set;
 import com.wardencloud.wardenstashedserver.entities.ConceptCard;
 import com.wardencloud.wardenstashedserver.entities.StudyCard;
 import com.wardencloud.wardenstashedserver.entities.User;
+import com.wardencloud.wardenstashedserver.es.entities.EsStudyCard;
 import com.wardencloud.wardenstashedserver.es.services.EsStudyCardService;
 import com.wardencloud.wardenstashedserver.mongodb.entities.MongoUser;
 import com.wardencloud.wardenstashedserver.repositories.StudyCardPagedJpaRepository;
@@ -48,10 +50,11 @@ public class StudyCardServiceImpl implements StudyCardService {
     private int pageSize = 10;
     private Sort sortRule = Sort.by(Sort.Order.desc("id"));
     private int termLengthLimit = 100;
-    private int definitionLengthLimit = 300;
+    private int definitionLengthLimit = 2000;
     private int titleLengthLimit = 100;
     private int descriptionLengthLimit = 300;
     private int schoolLengthLimit = 100;
+    private int numConceptCardsLimit = 100;
 
     public Page<StudyCard> findAllStudyCards(int pageNumber) {
         Pageable usePageable = PageRequest.of(pageNumber, pageSize, sortRule);
@@ -87,6 +90,9 @@ public class StudyCardServiceImpl implements StudyCardService {
                 return -1;
             }
         }
+        if (conceptCards.size() > numConceptCardsLimit) {
+            return -1;
+        } 
         Iterator<ConceptCard> conceptCardIterator = conceptCards.iterator();
         while (conceptCardIterator.hasNext()) {
             ConceptCard card = conceptCardIterator.next();
@@ -132,6 +138,7 @@ public class StudyCardServiceImpl implements StudyCardService {
         ConceptCard conceptCard = new ConceptCard();
         conceptCard.setTerm((String) map.get("term"));
         conceptCard.setDefinition((String) map.get("definition"));
+        conceptCard.setImg((String) map.get("img"));
         return conceptCard;
     }
 
@@ -221,5 +228,16 @@ public class StudyCardServiceImpl implements StudyCardService {
             studyCardRepository.deleteStudyCardById(studyCardId);
             esStudyCardService.deleteStudyCardById(studyCardId);
         }
+    }
+
+    public List<StudyCard> convertEsStudyCardsToStudyCards(List<EsStudyCard> esCards) {
+        Iterator<EsStudyCard> iterator = esCards.iterator();
+        List<StudyCard> sdCards = new ArrayList<>();
+        while (iterator.hasNext()) {
+            EsStudyCard esCard = iterator.next();
+            StudyCard sdCard = getStudyCardById(esCard.getId());
+            sdCards.add(sdCard);
+        }
+        return sdCards;
     }
 }

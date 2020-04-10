@@ -86,6 +86,15 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
+    public void changeUsername(int userId, String username) {
+        User user = findById(userId);
+        entityManager.persist(user);
+        user.setUsername(username);
+        entityManager.flush();
+        entityManager.refresh(user);
+    }
+
+    @Override
     public void changeUserPassword(int userId, String password) {
         User user = findById(userId);
         entityManager.persist(user);

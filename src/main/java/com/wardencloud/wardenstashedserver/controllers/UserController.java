@@ -58,10 +58,9 @@ public class UserController {
     @PassToken
     public ResponseEntity<Object> signUp(@RequestBody Map<String, String> payload) {
         JSONObject result = new JSONObject();
-        String username = payload.get("username");
         String email = payload.get("email");
         String password = payload.get("password");
-        JSONObject addUserResult = userService.addUser(username, email, password);
+        JSONObject addUserResult = userService.addUser(email, password);
         if (!addUserResult.getBooleanValue("success")) {
             result.put("errorMessages", addUserResult.getJSONObject("errorMessages"));
             return ResponseEntity.badRequest().body(result);
@@ -71,6 +70,29 @@ public class UserController {
             String token = tokenService.getToken(user);
             result.put(TOKEN_KEY, token);
             result.put(USER_ID_KEY, userId);
+            return ResponseEntity.ok().body(result);
+        }
+    }
+
+    @PutMapping(value = "/username")
+    public ResponseEntity<Object> changeUserName(@RequestHeader("token") String token, @RequestBody JSONObject payload) {
+        JSONObject result = new JSONObject();
+        int userId = tokenService.getUserIdFromToken(token);
+        if (userId == -1) {
+            JSONObject errorMessages = new JSONObject();
+            errorMessages.put(ERROR_MESSAGES_KEY, USER_NON_EXIST_MESSAGE);
+            result.put("errorMessages", errorMessages);
+            result.put("success", false);
+            return ResponseEntity.badRequest().body(result);
+        }
+        String username = payload.getString("username");
+        JSONObject userServiceResult = userService.changeUsername(userId, username);
+        if (!userServiceResult.getBooleanValue("success")) {
+            result.put("errorMessages", userServiceResult.getJSONObject("errorMessages"));
+            result.put("success", false);
+            return ResponseEntity.badRequest().body(result);
+        } else {
+            result.put("success", true);
             return ResponseEntity.ok().body(result);
         }
     }

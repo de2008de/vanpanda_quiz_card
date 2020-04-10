@@ -9,6 +9,7 @@ public interface UserRepository {
     User addUser(String username, String email, String password, String salt);
     User addCreditForUserById(int id, int credit);
     void changeUserEmail(int userId, String email);
+    void changeUsername(int userId, String username);
     void changeUserPassword(int userId, String password);
     void setUserEmailVerified(int userId);
 }

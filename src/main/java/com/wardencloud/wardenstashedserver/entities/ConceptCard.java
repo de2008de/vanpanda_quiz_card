@@ -17,8 +17,12 @@ public class ConceptCard implements Card {
     @Column(columnDefinition = "CHAR(100)")
     private String term;
 
-    @Column(columnDefinition = "CHAR(255)")
+    @Column(columnDefinition = "TEXT")
     private String definition;
+
+    // Image link
+    @Column(columnDefinition = "TEXT default null")
+    private String img;
 
     public int getId() {
         return id;
@@ -42,5 +46,13 @@ public class ConceptCard implements Card {
 
     public void setDefinition(String definition) {
         this.definition = definition;
+    }
+
+    public String getImg() {
+        return img;
+    }
+
+    public void setImg(String img) {
+        this.img = img;
     }
 }

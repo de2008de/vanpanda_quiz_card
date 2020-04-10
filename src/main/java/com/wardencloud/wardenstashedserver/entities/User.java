@@ -18,6 +18,9 @@ public class User {
     @Column(name = "email", unique = true, nullable = false, length = 100)
     private String email;
 
+    @Column(name = "type", columnDefinition = "integer default 0")
+    private int type;
+
     @Column(name = "is_email_verified", columnDefinition = "boolean default false")
     private boolean isEmailVerified;
 
@@ -111,4 +114,13 @@ public class User {
     public void setEmailVerified(boolean isEmailVerified) {
         this.isEmailVerified = isEmailVerified;
     }
+
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
+    }
+
 }

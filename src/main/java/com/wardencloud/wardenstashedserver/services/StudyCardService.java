@@ -7,6 +7,7 @@ import java.util.Set;
 import com.wardencloud.wardenstashedserver.entities.ConceptCard;
 import com.wardencloud.wardenstashedserver.entities.StudyCard;
 import com.wardencloud.wardenstashedserver.entities.User;
+import com.wardencloud.wardenstashedserver.es.entities.EsStudyCard;
 
 import org.springframework.data.domain.Page;
 
@@ -29,4 +30,5 @@ public interface StudyCardService {
     void collectStudyCard(int userId, int studyCardId);
     void removeStudyCardFromMyCollectionById(int userId, int studyCardId);
     boolean isStudyCardCollected(int userId, int studyCardId);
+    List<StudyCard> convertEsStudyCardsToStudyCards(List<EsStudyCard> esCards);
 }

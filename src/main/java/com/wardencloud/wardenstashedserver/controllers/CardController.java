@@ -117,7 +117,8 @@ public class CardController {
     public ResponseEntity<Object> search(HttpServletRequest request) {
         String content = request.getParameter("content");
         int pageNumber = Integer.parseInt(request.getParameter("page"));
-        List<EsStudyCard> studyCards = esStudyCardService.search(content, pageNumber);
+        List<EsStudyCard> esCards = esStudyCardService.search(content, pageNumber);
+        List<StudyCard> studyCards = studyCardService.convertEsStudyCardsToStudyCards(esCards);
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("data", studyCards);
         return ResponseEntity.ok().body(jsonObject);
