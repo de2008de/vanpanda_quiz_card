@@ -9,6 +9,7 @@ import org.elasticsearch.index.query.Operator;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import io.searchbox.client.JestClient;
@@ -21,7 +22,14 @@ public class EsStudyCardService {
     @Autowired
     private JestClient jestClient;
 
+    @Value("${feature.toggle.elasticsearch}")
+    private boolean elasticsearchToggle;
+
     public List<EsStudyCard> search(String content, int pageNumber) {
+        if (!elasticsearchToggle) {
+            return null;
+        }
+
         final int pageSize = 4;
         int baseIndex = pageNumber * pageSize;
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
@@ -49,6 +57,9 @@ public class EsStudyCardService {
     }
 
     public void deleteStudyCardById(int id) {
+        if (!elasticsearchToggle) {
+            return;
+        }
         Delete delete = new Delete
                         .Builder(Integer.toString(id))
                         .index("cards")

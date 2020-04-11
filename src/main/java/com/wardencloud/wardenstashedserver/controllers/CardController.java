@@ -20,6 +20,7 @@ import com.wardencloud.wardenstashedserver.services.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -53,6 +54,9 @@ public class CardController {
 
     @Autowired
     private UserService userService;
+
+    @Value("${feature.toggle.elasticsearch}")
+    private boolean elasticsearchToggle;
 
     @GetMapping(value = "/studycard")
     @PassToken
@@ -115,6 +119,9 @@ public class CardController {
     @GetMapping(value = "/search/studycard")
     @PassToken
     public ResponseEntity<Object> search(HttpServletRequest request) {
+        if (!elasticsearchToggle) {
+            return null;
+        }
         String content = request.getParameter("content");
         int pageNumber = Integer.parseInt(request.getParameter("page"));
         List<EsStudyCard> esCards = esStudyCardService.search(content, pageNumber);
