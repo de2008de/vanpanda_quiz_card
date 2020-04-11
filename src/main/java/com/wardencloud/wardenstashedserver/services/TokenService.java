@@ -5,7 +5,8 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.wardencloud.wardenstashedserver.entities.User;
+import com.wardencloud.wardenstashedserver.firebase.entities.FbUser;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -21,17 +22,17 @@ public class TokenService {
 
     private long TOKEN_VALID_DAYS = 7;
 
-    public String getToken(User user) {
+    public String getToken(FbUser user) {
         String token = "";
         Date expiredDate = getTokenExpiredDate();
         token = JWT.create()
-                .withAudience(Integer.toString(user.getId()))
+                .withAudience(Long.toString(user.getId()))
                 .withExpiresAt(expiredDate)
                 .sign(Algorithm.HMAC256(tokenSecret));
         return token;
     }
 
-    public int getUserIdFromToken(String token) {
+    public Long getUserIdFromToken(String token) {
         JWTVerifier jwtVerifier = JWT.require(Algorithm.HMAC256(tokenSecret)).build();
         DecodedJWT decodedJWT = null;
         try {
@@ -39,18 +40,18 @@ public class TokenService {
             // TODO: Do not throw exception when token is invalid, should return an error response
             decodedJWT = jwtVerifier.verify(token);
         } catch (JWTVerificationException e) {
-            return -1;
+            return -1l;
         }
 
         List<String> audiences = decodedJWT.getAudience();
         String userId = audiences.get(0);
-        return Integer.parseInt(userId);
+        return Long.parseLong(userId);
     }
 
 
-    public String getEmailVerifierToken(int userId) {
+    public String getEmailVerifierToken(Long userId) {
         String token = JWT.create()
-                        .withAudience(Integer.toString(userId))
+                        .withAudience(Long.toString(userId))
                         .sign(Algorithm.HMAC256(tokenSecret));
         return token;
     }
