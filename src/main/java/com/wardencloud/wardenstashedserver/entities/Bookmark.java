@@ -1,41 +1,29 @@
 package com.wardencloud.wardenstashedserver.entities;
 
-import javax.persistence.*;
+// import javax.persistence.*;
 
-@Entity
-@Table(name = "bookmarks")
+// @Entity
+// @Table(name = "bookmarks")
 public class Bookmark {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    // @Id
+    // @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    private int conceptCardId;
+    private Long conceptCardId;
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
-    public int getConceptCardId() {
+    public Long getConceptCardId() {
         return conceptCardId;
     }
 
-    public void setConceptCardId(int conceptCardId) {
+    public void setConceptCardId(Long conceptCardId) {
         this.conceptCardId = conceptCardId;
-    }
-
-    // Override hashCode() and equals() so that we can delete bookmark on constant time
-    @Override
-    public int hashCode() {
-        return this.conceptCardId;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        Bookmark bookmark = (Bookmark) obj;
-        return this.conceptCardId == bookmark.getConceptCardId();
     }
 }

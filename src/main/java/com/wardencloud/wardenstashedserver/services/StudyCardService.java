@@ -1,34 +1,33 @@
 package com.wardencloud.wardenstashedserver.services;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.wardencloud.wardenstashedserver.entities.ConceptCard;
-import com.wardencloud.wardenstashedserver.entities.StudyCard;
-import com.wardencloud.wardenstashedserver.entities.User;
-import com.wardencloud.wardenstashedserver.es.entities.EsStudyCard;
+import com.wardencloud.wardenstashedserver.firebase.entities.FbConceptCard;
+import com.wardencloud.wardenstashedserver.firebase.entities.FbStudyCard;
+import com.wardencloud.wardenstashedserver.firebase.entities.FbUser;
 
 import org.springframework.data.domain.Page;
 
 public interface StudyCardService {
-    Page<StudyCard> findAllStudyCards(int pageNumber);
-    int addStudyCard(
-            String title,
-            String description,
-            String school,
-            Set<ConceptCard> conceptCards,
-            int userId
+    Page<FbStudyCard> findAllStudyCards(int pageNumber);
+    Long addStudyCard(
+        String title,
+        String description,
+        Set<FbConceptCard> conceptCards,
+        Long userId
     );
-    Set<ConceptCard> convertListToConceptCardSet(List<Map<Object, Object>> list);
-    ConceptCard convertMapToConceptCard(Map<Object, Object> map);
-    StudyCard getStudyCardById(int id);
-    List<StudyCard> getStudyCardByIds(List<Integer> ids);
-    List<ConceptCard> getConceptCardsByIds(List<Integer> ids);
-    Page<StudyCard> getStudyCardsCreatedByMe(User user, int pageNumber);
-    List<Integer> getMyStudyCards(int userId, int pageNumber);
-    void collectStudyCard(int userId, int studyCardId);
-    void removeStudyCardFromMyCollectionById(int userId, int studyCardId);
-    boolean isStudyCardCollected(int userId, int studyCardId);
-    List<StudyCard> convertEsStudyCardsToStudyCards(List<EsStudyCard> esCards);
+    Set<FbConceptCard> convertListToConceptCardSet(List<Map<Object, Object>> list);
+    FbConceptCard convertMapToConceptCard(Map<Object, Object> map);
+    FbStudyCard getStudyCardById(Long id);
+    Collection<FbStudyCard> getStudyCardByIds(List<Long> ids);
+    Collection<FbConceptCard> getConceptCardsByIds(List<Long> ids);
+    FbConceptCard getConceptCardById(Long id);
+    Page<FbStudyCard> getStudyCardsCreatedByMe(FbUser user, int pageNumber);
+    List<FbStudyCard> getMyStudyCards(Long userId, int pageNumber);
+    void collectStudyCard(Long userId, Long studyCardId);
+    void removeStudyCardFromMyCollectionById(Long userId, Long studyCardId);
+    boolean isStudyCardCollected(Long userId, Long studyCardId);
 }

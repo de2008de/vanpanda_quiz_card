@@ -1,6 +1,6 @@
 package com.wardencloud.wardenstashedserver.services;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -8,14 +8,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.wardencloud.wardenstashedserver.entities.ConceptCard;
-import com.wardencloud.wardenstashedserver.entities.StudyCard;
-import com.wardencloud.wardenstashedserver.entities.User;
-import com.wardencloud.wardenstashedserver.es.entities.EsStudyCard;
-import com.wardencloud.wardenstashedserver.es.services.EsStudyCardService;
-import com.wardencloud.wardenstashedserver.mongodb.entities.MongoUser;
-import com.wardencloud.wardenstashedserver.repositories.StudyCardPagedJpaRepository;
-import com.wardencloud.wardenstashedserver.repositories.StudyCardRepository;
+import com.wardencloud.wardenstashedserver.firebase.entities.FbConceptCard;
+import com.wardencloud.wardenstashedserver.firebase.entities.FbStudyCard;
+import com.wardencloud.wardenstashedserver.firebase.entities.FbUser;
+import com.wardencloud.wardenstashedserver.firebase.repositories.FbStudyCardPagedRepository;
+import com.wardencloud.wardenstashedserver.firebase.repositories.FbStudyCardRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -23,29 +20,20 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 @Service
 @Qualifier("StudyCardServiceImpl")
 public class StudyCardServiceImpl implements StudyCardService {
-    @Autowired
-    private StudyCardPagedJpaRepository studyCardPagedJpaRepository;
 
     @Autowired
-    @Qualifier("StudyCardRepositoryImpl")
-    private StudyCardRepository studyCardRepository;
+    private FbStudyCardRepository fbStudyCardRepository;
+
+    @Autowired
+    private FbStudyCardPagedRepository fbStudyCardPagedRepository;
 
     @Autowired
     private UserService userService;
-
-    @Autowired
-    private MongoTemplate mongoTemplate;
-
-    @Autowired
-    private EsStudyCardService esStudyCardService;
 
     private int pageSize = 10;
     private Sort sortRule = Sort.by(Sort.Order.desc("id"));
@@ -53,59 +41,51 @@ public class StudyCardServiceImpl implements StudyCardService {
     private int definitionLengthLimit = 2000;
     private int titleLengthLimit = 100;
     private int descriptionLengthLimit = 300;
-    private int schoolLengthLimit = 100;
     private int numConceptCardsLimit = 100;
 
-    public Page<StudyCard> findAllStudyCards(int pageNumber) {
+    @Override
+    public Page<FbStudyCard> findAllStudyCards(int pageNumber) {
         Pageable usePageable = PageRequest.of(pageNumber, pageSize, sortRule);
-        return studyCardPagedJpaRepository.findAll(usePageable);
+        return fbStudyCardPagedRepository.findAll(usePageable);
     }
 
-    public int addStudyCard(String title, String description, String school, Set<ConceptCard> conceptCards,
-            int userId) {
-        User user = userService.findUserById(userId);
+    @Override
+    public Long addStudyCard(String title, String description, Set<FbConceptCard> conceptCards, Long userId) {
+        FbUser user = userService.findUserById(userId);
         if (user == null) {
-            return -1;
+            return -1l;
         }
         if (title == null) {
-            return -1;
+            return -1l;
         }
         title = title.trim();
         if (title.length() == 0 || title.length() > titleLengthLimit) {
-            return -1;
+            return -1l;
         }
         if (description != null) {
             description = description.trim();
             if (description.length() == 0) {
                 description = null;
             } else if (description.length() > descriptionLengthLimit) {
-                return -1;
-            }
-        }
-        if (school != null) {
-            school = school.trim();
-            if (school.length() == 0) {
-                school = null;
-            } else if (school.length() > schoolLengthLimit) {
-                return -1;
+                return -1l;
             }
         }
         if (conceptCards.size() > numConceptCardsLimit) {
-            return -1;
-        } 
-        Iterator<ConceptCard> conceptCardIterator = conceptCards.iterator();
+            return -1l;
+        }
+        Iterator<FbConceptCard> conceptCardIterator = conceptCards.iterator();
         while (conceptCardIterator.hasNext()) {
-            ConceptCard card = conceptCardIterator.next();
+            FbConceptCard card = conceptCardIterator.next();
             if (!sanitizeAndValidateConceptCard(card)) {
-                return -1;
+                return -1l;
             }
         }
-        int studyCardId = studyCardRepository.addStudyCard(title, description, school, conceptCards, user);
+        Long studyCardId = fbStudyCardRepository.addStudyCard(title, description, conceptCards, user);
         collectStudyCard(userId, studyCardId);
         return studyCardId;
     }
 
-    private boolean sanitizeAndValidateConceptCard(ConceptCard conceptCard) {
+    private boolean sanitizeAndValidateConceptCard(FbConceptCard conceptCard) {
         String term = conceptCard.getTerm();
         String definition = conceptCard.getDefinition();
         if (term == null || definition == null) {
@@ -124,120 +104,90 @@ public class StudyCardServiceImpl implements StudyCardService {
         return true;
     }
 
-    public Set<ConceptCard> convertListToConceptCardSet(List<Map<Object, Object>> list) {
+    @Override
+    public Set<FbConceptCard> convertListToConceptCardSet(List<Map<Object, Object>> list) {
         Iterator<Map<Object, Object>> iterator = list.listIterator();
-        Set<ConceptCard> conceptCardSet = new HashSet<>();
+        Set<FbConceptCard> conceptCardSet = new HashSet<>();
         while (iterator.hasNext()) {
-            ConceptCard conceptCard = convertMapToConceptCard(iterator.next());
+            FbConceptCard conceptCard = convertMapToConceptCard(iterator.next());
             conceptCardSet.add(conceptCard);
         }
         return conceptCardSet;
     }
 
-    public ConceptCard convertMapToConceptCard(Map<Object, Object> map) {
-        ConceptCard conceptCard = new ConceptCard();
+    @Override
+    public FbConceptCard convertMapToConceptCard(Map<Object, Object> map) {
+        FbConceptCard conceptCard = new FbConceptCard();
         conceptCard.setTerm((String) map.get("term"));
         conceptCard.setDefinition((String) map.get("definition"));
         conceptCard.setImg((String) map.get("img"));
         return conceptCard;
     }
 
-    public StudyCard getStudyCardById(int id) {
-        return studyCardRepository.getStudyCardById(id);
+    @Override
+    public FbStudyCard getStudyCardById(Long id) {
+        return fbStudyCardRepository.getStudyCardById(id);
     }
 
-    public List<StudyCard> getStudyCardByIds(List<Integer> ids) {
-        return studyCardRepository.getStudyCardByIds(ids);
+    @Override
+    public Collection<FbStudyCard> getStudyCardByIds(List<Long> ids) {
+        return fbStudyCardRepository.getStudyCardByIds(ids);
     }
 
-    public List<ConceptCard> getConceptCardsByIds(List<Integer> ids) {
-        return studyCardRepository.getConceptCardsByIds(ids);
+    @Override
+    public Collection<FbConceptCard> getConceptCardsByIds(List<Long> ids) {
+        return fbStudyCardRepository.getConceptCardsByIds(ids);
     }
 
-    public Page<StudyCard> getStudyCardsCreatedByMe(User user, int pageNumber) {
+    @Override
+    public Page<FbStudyCard> getStudyCardsCreatedByMe(FbUser user, int pageNumber) {
         Pageable usePageable = PageRequest.of(pageNumber, pageSize, sortRule);
-        return studyCardPagedJpaRepository.findByUser(user, usePageable);
+        return fbStudyCardPagedRepository.findByUser(user, usePageable);
     }
 
-    public List<Integer> getMyStudyCards(int userId, int pageNumber) {
-        Query query = Query.query(Criteria.where("id").is(userId));
-        MongoUser mongoUser = mongoTemplate.findOne(query, MongoUser.class);
-        if (mongoUser == null) {
-            mongoUser = userService.addMongoUser(userId);
-        }
-        List<Integer> studyCardIds = mongoUser.getOwnedStudyCards();
+    @Override
+    public List<FbStudyCard> getMyStudyCards(Long userId, int pageNumber) {
+        FbUser user = userService.findUserById(userId);
+        Set<FbStudyCard> studyCards = user.getOwnedStudyCards();
         int pageSize = 5;
-        List<Integer> resultStudyCardIds = new LinkedList<>();
-        Integer[] studyCardIdsArray = new Integer[resultStudyCardIds.size()];
-        studyCardIdsArray = studyCardIds.toArray(studyCardIdsArray);
+        List<FbStudyCard> resultStudyCards = new LinkedList<>();
+        FbStudyCard[] studyCardsArray = new FbStudyCard[studyCards.size()];
+        studyCardsArray = studyCards.toArray(studyCardsArray);
         int startingIndex = pageSize * pageNumber;
         int endingIndex = pageSize * pageNumber + pageSize;
-        for (int i = startingIndex; i < endingIndex && i < studyCardIdsArray.length; i++) {
-            resultStudyCardIds.add(studyCardIdsArray[i]);
+        for (int i = startingIndex; i < endingIndex && i < studyCardsArray.length; i++) {
+            resultStudyCards.add(studyCardsArray[i]);
         }
-        return resultStudyCardIds;
+        return resultStudyCards;
     }
 
-    public void collectStudyCard(int userId, int studyCardId) {
-        Query query = Query.query(Criteria.where("id").is(userId));
-        MongoUser mongoUser = mongoTemplate.findOne(query, MongoUser.class);
-        if (mongoUser == null) {
-            mongoUser = userService.addMongoUser(userId);
-        }
-        List<Integer> studyCardIds = mongoUser.getOwnedStudyCards();
-        boolean isIdExisting = studyCardIds.contains(new Integer(studyCardId));
-        if (isIdExisting) {
-            return;
-        }
-        mongoUser.addOwnedStudyCardById(studyCardId);
-        mongoTemplate.save(mongoUser);
+    @Override
+    public void collectStudyCard(Long userId, Long studyCardId) {
+        FbUser user = userService.findUserById(userId);
+        FbStudyCard sdCard = getStudyCardById(studyCardId);
+        user.addOwnedStudyCard(sdCard);
+        userService.updateUser(user);
     }
 
-    public void removeStudyCardFromMyCollectionById(int userId, int studyCardId) {
-        Query query = Query.query(Criteria.where("id").is(userId));
-        MongoUser mongoUser = mongoTemplate.findOne(query, MongoUser.class);
-        if (mongoUser == null) {
-            mongoUser = userService.addMongoUser(userId);
+    @Override
+    public void removeStudyCardFromMyCollectionById(Long userId, Long studyCardId) {
+        FbUser user = userService.findUserById(userId);
+        user.removeOwnedStudyCard(studyCardId);
+        FbStudyCard sdCard = fbStudyCardRepository.getStudyCardById(studyCardId);
+        if (sdCard.getUserId().equals(userId)) {
+            fbStudyCardRepository.deleteStudyCardById(studyCardId);
         }
-        mongoUser.deleteOwnedStudyCardById(studyCardId);
-        mongoTemplate.save(mongoUser);
-        StudyCard studyCard = studyCardRepository.getStudyCardById(studyCardId);
-        int creatorUserId = studyCard.getUserId();
-        if (userId == creatorUserId) {
-            deleteStudyCardCreatedByMe(userId, studyCardId);
-        }
+        userService.updateUser(user);
     }
 
-    public boolean isStudyCardCollected(int userId, int studyCardId) {
-        Query query = Query.query(Criteria.where("id").is(userId));
-        MongoUser mongoUser = mongoTemplate.findOne(query, MongoUser.class);
-        if (mongoUser == null) {
-            mongoUser = userService.addMongoUser(userId);
-        }
-        List<Integer> studyCardIds = mongoUser.getOwnedStudyCards();
-        boolean doesOwnStudyCard = studyCardIds.contains(studyCardId);
-        return doesOwnStudyCard;
+    @Override
+    public boolean isStudyCardCollected(Long userId, Long studyCardId) {
+        FbUser user = userService.findUserById(userId);
+        return user.isOwnedStudyCard(studyCardId);
     }
 
-    private void deleteStudyCardCreatedByMe(int userId, int studyCardId) {
-        StudyCard studyCard = studyCardRepository.getStudyCardById(studyCardId);
-        int creatorUserId = studyCard.getUserId();
-        if (userId != creatorUserId) {
-            return;
-        } else {
-            studyCardRepository.deleteStudyCardById(studyCardId);
-            esStudyCardService.deleteStudyCardById(studyCardId);
-        }
-    }
-
-    public List<StudyCard> convertEsStudyCardsToStudyCards(List<EsStudyCard> esCards) {
-        Iterator<EsStudyCard> iterator = esCards.iterator();
-        List<StudyCard> sdCards = new ArrayList<>();
-        while (iterator.hasNext()) {
-            EsStudyCard esCard = iterator.next();
-            StudyCard sdCard = getStudyCardById(esCard.getId());
-            sdCards.add(sdCard);
-        }
-        return sdCards;
+    @Override
+    public FbConceptCard getConceptCardById(Long id) {
+        return fbStudyCardRepository.getConceptCardById(id);
     }
 }

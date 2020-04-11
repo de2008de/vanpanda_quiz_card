@@ -1,6 +1,6 @@
 package com.wardencloud.wardenstashedserver.interceptors;
 
-import com.wardencloud.wardenstashedserver.entities.User;
+import com.wardencloud.wardenstashedserver.firebase.entities.FbUser;
 import com.wardencloud.wardenstashedserver.jwt.annotations.PassToken;
 import com.wardencloud.wardenstashedserver.services.TokenService;
 import com.wardencloud.wardenstashedserver.services.UserService;
@@ -34,8 +34,8 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         if (token == null) {
             return false;
         }
-        int userId = tokenService.getUserIdFromToken(token);
-        User user = userService.findUserById(userId);
+        Long userId = tokenService.getUserIdFromToken(token);
+        FbUser user = userService.findUserById(userId);
         if (user == null) {
             return false;
         }

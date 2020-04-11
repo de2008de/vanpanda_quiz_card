@@ -5,7 +5,7 @@ import com.wardencloud.wardenstashedserver.entities.Bookmark;
 import java.util.List;
 
 public interface BookmarkService {
-    List<Bookmark> getBookmarkByUserId(int id);
-    int addBookmarkByUserId(int userId, int conceptCardId);
-    int deleteBookmarkByConceptCardId(int userId, int conceptCardId);
+    List<Bookmark> getBookmarkByUserId(Long id);
+    void addBookmarkByUserId(Long userId, Long conceptCardId);
+    void deleteBookmarkByConceptCardId(Long userId, Long conceptCardId);
 }
