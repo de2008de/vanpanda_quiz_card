@@ -37,49 +37,49 @@ services:
       # TZ: America/Vancouver
     depends_on:
       - mysql1
-      - elasticsearch
+      # - elasticsearch
 
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.4.2
-    expose:
-      - 9300
-      - 9200
-    # ports:
-    #     - 9300:9300
-    #     - 9200:9200
-    environment:
-      - cluster.name=docker-cluster
-      - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-      - http.cors.enabled=true
-      - http.cors.allow-origin=*
-      - discovery.type=single-node
-      # - TZ=America/Vancouver
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    networks:
-      - backend
+  # elasticsearch:
+  #   image: docker.elastic.co/elasticsearch/elasticsearch:7.4.2
+  #   expose:
+  #     - 9300
+  #     - 9200
+  #   # ports:
+  #   #     - 9300:9300
+  #   #     - 9200:9200
+  #   environment:
+  #     - cluster.name=docker-cluster
+  #     - bootstrap.memory_lock=true
+  #     - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+  #     - http.cors.enabled=true
+  #     - http.cors.allow-origin=*
+  #     - discovery.type=single-node
+  #     # - TZ=America/Vancouver
+  #   ulimits:
+  #     memlock:
+  #       soft: -1
+  #       hard: -1
+  #   networks:
+  #     - backend
 
-  logstash1:
-    build:
-      context: docker/logstash/
-    volumes:
-      - type: bind
-        source: ./docker/logstash/pipeline
-        target: /usr/share/logstash/pipeline
-        read_only: true
-    # ports:
-    #   - "5000:5000"
-    #   - "9600:9600"
-    environment:
-      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
-      # TZ: America/Vancouver
-    networks:
-      - backend
-    depends_on:
-      - elasticsearch
+  # logstash1:
+  #   build:
+  #     context: docker/logstash/
+  #   volumes:
+  #     - type: bind
+  #       source: ./docker/logstash/pipeline
+  #       target: /usr/share/logstash/pipeline
+  #       read_only: true
+  #   # ports:
+  #   #   - "5000:5000"
+  #   #   - "9600:9600"
+  #   environment:
+  #     LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+  #     # TZ: America/Vancouver
+  #   networks:
+  #     - backend
+  #   depends_on:
+  #     - elasticsearch
 
 networks:
   backend:
