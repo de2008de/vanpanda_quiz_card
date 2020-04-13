@@ -16,7 +16,6 @@ import com.wardencloud.wardenstashedserver.services.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -63,7 +62,6 @@ public class CardController {
     public ResponseEntity<Object> addStudyCard(@RequestHeader("token") String token, @RequestBody JSONObject payload) {
         String title = (String) payload.get("title");
         String description = (String) payload.get("description");
-        String school = (String) payload.get("school");
         List<?> uncastedConceptCardList = (List<?>) payload.get("conceptCards");
 
         // Safe checked type conversion

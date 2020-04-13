@@ -141,8 +141,8 @@ public class StudyCardServiceImpl implements StudyCardService {
 
     @Override
     public Page<FbStudyCard> getStudyCardsCreatedByMe(FbUser user, int pageNumber) {
-        Pageable usePageable = PageRequest.of(pageNumber, pageSize, sortRule);
-        return fbStudyCardPagedRepository.findByUser(user, usePageable);
+        Pageable usePageable = PageRequest.of(pageNumber, pageSize);
+        return fbStudyCardPagedRepository.findByUserId(user.getId(), usePageable);
     }
 
     @Override
