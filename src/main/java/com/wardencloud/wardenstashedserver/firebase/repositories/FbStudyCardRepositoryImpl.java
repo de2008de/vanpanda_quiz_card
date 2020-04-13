@@ -27,6 +27,7 @@ public class FbStudyCardRepositoryImpl implements FbStudyCardRepository {
         sdCard.setDescription(description);
         sdCard.setConceptCards(conceptCards);
         sdCard.setUser(user);
+        sdCard.setUserId(user.getId());
         datastoreTemplate.save(sdCard);
         return sdCard.getId();
     }
